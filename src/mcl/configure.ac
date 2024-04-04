@@ -1,0 +1,39 @@
+AC_PREREQ([2.69])
+
+define(_PKG_VERSION_MAJOR, 0)
+define(_PKG_VERSION_MINOR, 1)
+define(_PKG_VERSION_BUILD, 0)
+define(_PKG_VERSION_IS_RELEASE, false)
+
+define(_LIB_VERSION_CURRENT, 1)
+define(_LIB_VERSION_REVISION, 1)
+define(_LIB_VERSION_AGE, 1)
+AC_INIT([libmcl], m4_join([.], _PKG_VERSION_MAJOR, _PKG_VERSION_MINOR, _PKG_VERSION_BUILD)m4_if(_PKG_VERSION_IS_RELEASE, [true], [], [-pre]), [https://github.com/herumi/mcl/issues], [libmcl], [https://github.com/herumi/mcl])
+OBJ_DIR=obj
+AC_SUBST(OBJ_DIR)
+AC_SUBST(LIB_VERSION_CURRENT, _LIB_VERSION_CURRENT)
+AC_SUBST(LIB_VERSION_REVISION, _LIB_VERSION_REVISION)
+AC_SUBST(LIB_VERSION_AGE, _LIB_VERSION_AGE)
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([build-aux/m4])
+AC_CANONICAL_HOST
+AH_TOP([#ifndef LIBMCL_CONFIG_H])
+AH_TOP([#define LIBMCL_CONFIG_H])
+AH_BOTTOM([#endif /*LIBMCL_CONFIG_H*/])
+
+AM_INIT_AUTOMAKE([1.11.2 foreign subdir-objects])
+
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
+AC_PROG_CXX
+AM_PROG_AR
+
+LT_INIT([win32-dll])
+
+MCL_CFLAGS="-DMCL_SIZEOF_UNIT=8 -DMCL_MAX_BIT_SIZE=384 -Wall -Wextra -O3"
+AC_SUBST(MCL_CFLAGS)
+
+AC_CONFIG_HEADERS([src/config.h])
+AC_CONFIG_FILES([Makefile libmcl.pc])
+
+AC_OUTPUT
