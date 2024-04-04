@@ -9,9 +9,11 @@
 #include "crypto/ripemd160.h"
 #include "crypto/sha1.h"
 #include "crypto/sha256.h"
+#include "script/groth16.h"
 #include "pubkey.h"
 #include "script/script.h"
 #include "uint256.h"
+#include "mcl/bn_c384_256.h"
 
 using namespace std;
 
@@ -426,7 +428,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     break;
                 }
 
-                case OP_NOP1: case OP_NOP4: case OP_NOP5:
+                case OP_NOP1: case OP_NOP5:
                 case OP_NOP6: case OP_NOP7: case OP_NOP8: case OP_NOP9: case OP_NOP10:
                 {
                     if (flags & SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS)
@@ -1024,6 +1026,183 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     }
                 }
                 break;
+                case OP_CHECKGROTH16:
+                {
+                    /*
+                    *  Groth 16 Proof with 2 Public Inputs over BLS-381-256 
+                    *  Fp => 48 bytes <=> Fr => 32 bytes
+                    *  Input Layout:
+                    * stacktop(-31 or -30)     <==>   π_A_x (Fp -> 48 bytes)
+                    * stacktop(-30 or -29)     <==>   π_A_y (Fp -> 48 bytes)
+                    * stacktop(-29 or -28)     <==>   π_B_x_A0 (Fp -> 48 bytes)
+                    * stacktop(-28 or -27)     <==>   π_B_x_A1 (Fp -> 48 bytes)
+                    * stacktop(-27 or -26)     <==>   π_B_y_A0 (Fp -> 48 bytes)
+                    * stacktop(-26 or -25)     <==>   π_B_y_A1 (Fp -> 48 bytes)
+                    * stacktop(-25 or -24)     <==>   π_C_x (Fp -> 48 bytes)
+                    * stacktop(-24 or -23)     <==>   π_C_y (Fp -> 48 bytes)
+                    * stacktop(-23 or -22)     <==>   public_input_0 (Fr -> 32 bytes)
+                    * stacktop(-22 or omitted) <==>   public_input_1_or_argument (
+                    *             iff public_input_1_validation_mode == 0, 
+                    *                (Fr->32 bytes), 
+                    *                else if 1 mode -> omitted
+                    *                else the block number which the proof references
+                    * 
+                    * // this usually going to be where witness ends and the script starts
+                    * OP_DUP
+                    * <block number before when the tx is funded>
+                    * OP_GREATERTHAN
+                    * OP_VERIFY
+                    * OP_SWAP ... // validate the user defined public input if necessary
+                    * 
+                    * 
+                    * OP_SWAP // put the public inputs back in the right order
+                    * // most of the time the vk will be hard coded
+                    * stacktop(-21) <==>   [α]₁_x (Fp -> 48 bytes)
+                    * stacktop(-20) <==>   [α]₁_y (Fp -> 48 bytes)
+                    * stacktop(-19) <==>   [K_0]₁_x-> (Fp -> 48 bytes)
+                    * stacktop(-18) <==>   [K_0]₁_y-> (Fp -> 48 bytes)
+                    * stacktop(-17) <==>   [K_1]₁_x-> (Fp -> 48 bytes)
+                    * stacktop(-16) <==>   [K_1]₁_y-> (Fp -> 48 bytes)
+                    * stacktop(-15) <==>   [K_2]₁_x-> (Fp -> 48 bytes)
+                    * stacktop(-14) <==>   [K_2]₁_y-> (Fp -> 48 bytes)
+                    * stacktop(-13) <==>   [β]₂_X_A0 (Fp -> 48 Bytes)
+                    * stacktop(-12) <==>   [β]₂_X_A1 (Fp -> 48 Bytes)
+                    * stacktop(-11) <==>   [β]₂_Y_A0 (Fp -> 48 Bytes)
+                    * stacktop(-10) <==>   [β]₂_Y_A1 (Fp -> 48 Bytes)
+                    * stacktop(-9) <==>    [γ]₂_X_A0 (Fp -> 48 Bytes)
+                    * stacktop(-8) <==>    [γ]₂_X_A1 (Fp -> 48 Bytes)
+                    * stacktop(-7) <==>    [γ]₂_Y_A0 (Fp -> 48 Bytes)
+                    * stacktop(-6) <==>    [γ]₂_Y_A1 (Fp -> 48 Bytes)
+                    * stacktop(-5) <==>    [δ]₂_X_A0 (Fp -> 48 Bytes)
+                    * stacktop(-4) <==>    [δ]₂_X_A1 (Fp -> 48 Bytes)
+                    * stacktop(-3) <==>    [δ]₂_Y_A0 (Fp -> 48 Bytes)
+                    * stacktop(-2) <==>    [δ]₂_Y_A1 (Fp -> 48 Bytes)
+                    * stacktop(-1) <==>    public_input_1_validation_mode  <---- top of stack
+                    * modes: (CScriptInt, 0 => no validate input, 1 => tx_hash only (useful for covenants), 2 => block id mode)
+                    * OP_CHECKGROTH16
+                    */
+                    if (stack.size() < 31)
+                        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+
+                    CScriptNum mode(stacktop(-1), fRequireMinimal);
+                    size_t upperStackOffset = 0;
+                    if(mode.getint() == 1){
+
+                        // tx_hash mode has no public_input_1
+                        upperStackOffset = 1;
+                    }else{
+                    if (stack.size() < 32)
+                        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+
+                    }
+                    if(mode.getint() != 1 || mode.getint() != 0) {
+                        // todo: implement mode 2
+                        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+                    }
+                    
+                    valtype& deltaYA1 = stacktop(-2);
+                    valtype& deltaYA0 = stacktop(-3);
+                    valtype& deltaXA1 = stacktop(-4);
+                    valtype& deltaXA0 = stacktop(-5);
+                    valtype& gammaYA1 = stacktop(-6);
+                    valtype& gammaYA0 = stacktop(-7);
+                    valtype& gammaXA1 = stacktop(-8);
+                    valtype& gammaXA0 = stacktop(-9);
+                    valtype& betaYA1 = stacktop(-10);
+                    valtype& betaYA0 = stacktop(-11);
+                    valtype& betaXA1 = stacktop(-12);
+                    valtype& betaXA0 = stacktop(-13);
+                    valtype& K2Y = stacktop(-14);
+                    valtype& K2X = stacktop(-15);
+                    valtype& K1Y = stacktop(-16);
+                    valtype& K1X = stacktop(-17);
+                    valtype& K0Y = stacktop(-18);
+                    valtype& K0X = stacktop(-19);
+                    valtype& alphaY = stacktop(-20);
+                    valtype& alphaX = stacktop(-21);
+                    
+                    // Subset of script starting at the most recent codeseparator
+                    //CScript scriptCode(pbegincodehash, pend);
+
+
+                    CScript scriptCode(pbegincodehash, pend);
+
+
+                    /*
+                    todo: drop the proof
+                    // Drop the signature in pre-segwit scripts but not segwit scripts
+                    if (sigversion == SIGVERSION_BASE) {
+                        scriptCode.FindAndDelete(CScript(vchSig));
+                    }
+                    */
+                    valtype publicInput1(32); //tx
+                    //TODO: compute tx hash
+
+
+
+                    // cut off for witness, if mode is 1, then public_input_1 is the current tx_hash instead of a public input
+                    valtype& public_input_1 = mode.getint()==1?publicInput1:stacktop(-22);
+                    valtype& public_input_0 = stacktop(-23+upperStackOffset);
+                    valtype& piC_Y = stacktop(-24+upperStackOffset);
+                    valtype& piC_X = stacktop(-25+upperStackOffset);
+                    valtype& piB_Y_A1 = stacktop(-26+upperStackOffset);
+                    valtype& piB_Y_A0 = stacktop(-27+upperStackOffset);
+                    valtype& piB_X_A1 = stacktop(-28+upperStackOffset);
+                    valtype& piB_X_A0 = stacktop(-29+upperStackOffset);
+                    valtype& piA_Y = stacktop(-30+upperStackOffset);
+                    valtype& piA_X = stacktop(-31+upperStackOffset);
+                    
+
+                    //todo: verify proof
+                    CGROTH16 groth16Verifier = CGROTH16();
+
+
+                    /* add if statments
+                    groth16Verifier.SetBeta(&betaXA0, &betaYA0, &betaXA1, &betaYA1);
+                    groth16Verifier.SetGamma(&gammaXA0, &gammaYA0, &gammaXA1, &gammaYA1);
+                    groth16Verifier.SetDelta(&deltaXA0, &deltaYA0, &deltaXA1, &deltaYA1);
+                    groth16Verifier.SetK0(&K0X, &K0Y);
+                    groth16Verifier.SetK1(&K1X, &K1Y);
+                    groth16Verifier.SetK2(&K2X, &K2Y);
+
+                    groth16Verifier.SetPi1(&piA_X, &piA_Y);
+                    groth16Verifier.SetPi2(&piB_X_A0, &piB_Y_A0, &piB_X_A1, &piB_Y_A1);
+                    groth16Verifier.SetPi3(&piC_X, &piC_Y);
+
+                    groth16Verifier.SetPublicInputs(&public_input_0, &public_input_1);
+                    */
+
+                   if(
+                        !(groth16Verifier.SetAlpha(&alphaX, &alphaY) &&
+                        groth16Verifier.SetBeta(&betaXA0, &betaYA0, &betaXA1, &betaYA1) &&
+                        groth16Verifier.SetGamma(&gammaXA0, &gammaYA0, &gammaXA1, &gammaYA1) &&
+                        groth16Verifier.SetDelta(&deltaXA0, &deltaYA0, &deltaXA1, &deltaYA1) &&
+                        groth16Verifier.SetK0(&K0X, &K0Y) &&
+                        groth16Verifier.SetK1(&K1X, &K1Y) &&
+                        groth16Verifier.SetK2(&K2X, &K2Y) &&
+                        groth16Verifier.SetPi1(&piA_X, &piA_Y) &&
+                        groth16Verifier.SetPi2(&piB_X_A0, &piB_Y_A0, &piB_X_A1, &piB_Y_A1) &&
+                        groth16Verifier.SetPi3(&piC_X, &piC_Y) &&
+                        groth16Verifier.SetPublicInputs(&public_input_0, &public_input_1))
+                    ) {
+                        // SCRIPT_ERR_WITNESS_PUBKEYTYPE -> makes sense?
+                        return set_error(serror, SCRIPT_ERR_WITNESS_PUBKEYTYPE);
+                    }
+                    
+
+                    
+                    bool fSuccess = groth16Verifier.Verify();
+
+                    for(int i=0;i<31;i++){
+                        popstack(stack);
+                    }
+                    if(mode.getint() != 1){
+                        popstack(stack); // extra value for mode 0 and 2
+                    }
+
+                    stack.push_back(fSuccess ? vchTrue : vchFalse);
+                }
+                break;
 
                 default:
                     return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
@@ -1349,6 +1528,14 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     // comparison is a simple numeric one.
     if (nSequenceMasked > txToSequenceMasked)
         return false;
+
+    return true;
+}
+
+bool TransactionSignatureChecker::GetSigHash(const std::vector<unsigned char>& scriptSig, int nHashType, const CScript& scriptCode, SigVersion sigversion, uint256 * sighashOut) 
+{
+
+    *sighashOut = SignatureHash(scriptCode, *txTo, nIn, nHashType, amount, sigversion, this->txdata);
 
     return true;
 }

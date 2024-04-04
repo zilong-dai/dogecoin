@@ -7,7 +7,7 @@
 
 #include "tinyformat.h"
 #include "utilstrencodings.h"
-
+#include "mcl/bn_c384_256.h"
 using namespace std;
 
 const char* GetOpName(opcodetype opcode)
@@ -133,7 +133,7 @@ const char* GetOpName(opcodetype opcode)
     case OP_NOP1                   : return "OP_NOP1";
     case OP_CHECKLOCKTIMEVERIFY    : return "OP_CHECKLOCKTIMEVERIFY";
     case OP_CHECKSEQUENCEVERIFY    : return "OP_CHECKSEQUENCEVERIFY";
-    case OP_NOP4                   : return "OP_NOP4";
+    case OP_CHECKGROTH16                   : return "OP_CHECKGROTH16";
     case OP_NOP5                   : return "OP_NOP5";
     case OP_NOP6                   : return "OP_NOP6";
     case OP_NOP7                   : return "OP_NOP7";
