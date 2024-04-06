@@ -1174,7 +1174,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     
                     bool fSuccess = groth16Verifier.Verify();
 
-                    for(int i=0;i<31;i++){
+                    for(int i=0;i<30;i++){
                         popstack(stack);
                     }
                     if(mode.getint() != 1){
