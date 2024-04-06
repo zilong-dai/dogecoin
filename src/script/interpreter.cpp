@@ -1078,7 +1078,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     * stacktop(-3) <==>    [δ]₂_Y_A0 (Fp -> 48 Bytes)
                     * stacktop(-2) <==>    [δ]₂_Y_A1 (Fp -> 48 Bytes)
                     * stacktop(-1) <==>    public_input_1_validation_mode  <---- top of stack
-                    * modes: (CScriptInt, 0 => no validate input, 1 => tx_hash only (useful for covenants), 2 => block id mode)
+                    * modes: (CScriptInt, 0 => no validate input, 1 => tx_hash only (useful for covenants), 2 => sha256_192(tx_hash, extra input),  3 => block id mode
                     * OP_CHECKGROTH16
                     */
                     if (stack.size() < 31)
@@ -1095,8 +1095,8 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
 
                     }
-                    if(mode.getint() != 1 || mode.getint() != 0) {
-                        // todo: implement mode 2
+                    if(mode.getint() != 1 || mode.getint() != 0){
+                        // todo: implement mode 2 and 3
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
                     }
                     
@@ -1155,23 +1155,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
 
                     //todo: verify proof
                     CGROTH16 groth16Verifier = CGROTH16();
-
-
-                    /* add if statments
-                    groth16Verifier.SetBeta(&betaXA0, &betaYA0, &betaXA1, &betaYA1);
-                    groth16Verifier.SetGamma(&gammaXA0, &gammaYA0, &gammaXA1, &gammaYA1);
-                    groth16Verifier.SetDelta(&deltaXA0, &deltaYA0, &deltaXA1, &deltaYA1);
-                    groth16Verifier.SetK0(&K0X, &K0Y);
-                    groth16Verifier.SetK1(&K1X, &K1Y);
-                    groth16Verifier.SetK2(&K2X, &K2Y);
-
-                    groth16Verifier.SetPi1(&piA_X, &piA_Y);
-                    groth16Verifier.SetPi2(&piB_X_A0, &piB_Y_A0, &piB_X_A1, &piB_Y_A1);
-                    groth16Verifier.SetPi3(&piC_X, &piC_Y);
-
-                    groth16Verifier.SetPublicInputs(&public_input_0, &public_input_1);
-                    */
-
                    if(
                         !(groth16Verifier.SetAlpha(&alphaX, &alphaY) &&
                         groth16Verifier.SetBeta(&betaXA0, &betaYA0, &betaXA1, &betaYA1) &&
