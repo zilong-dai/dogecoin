@@ -1153,7 +1153,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     valtype& piA_X = stacktop(-31+upperStackOffset);
                     
 
-                    //todo: verify proof
                     CGROTH16 groth16Verifier = CGROTH16();
                    if(
                         !(groth16Verifier.SetAlpha(&alphaX, &alphaY) &&
