@@ -1081,7 +1081,8 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     * modes: (CScriptInt, 0 => no validate input, 1 => tx_hash only (useful for covenants), 2 => sha256_192(tx_hash, extra input),  3 => block id mode
                     * OP_CHECKGROTH16
                     */
-                    if (stack.size() < 31)
+
+                    if (stack.size() < 30)
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
 
                     CScriptNum mode(stacktop(-1), fRequireMinimal);
@@ -1090,14 +1091,12 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
 
                         // tx_hash mode has no public_input_1
                         upperStackOffset = 1;
-                    }else{
-                    if (stack.size() < 32)
+                    }else if (stack.size() < 31){
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
-
                     }
                     if(mode.getint() != 1 || mode.getint() != 0){
                         // todo: implement mode 2 and 3
-                        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+                        return set_error(serror, SCRIPT_ERR_SIG_DER);
                     }
                     
                     valtype& deltaYA1 = stacktop(-2);
