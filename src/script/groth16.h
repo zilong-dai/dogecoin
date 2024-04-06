@@ -44,7 +44,10 @@ private:
     mclBnFr public_inputs[2];
 
 public:
-    CGROTH16(){};
+    CGROTH16(){
+
+    	mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
+    };
 
     bool SetPi1(
         const std::vector<unsigned char>* x,
