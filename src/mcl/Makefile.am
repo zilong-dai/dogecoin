@@ -6,7 +6,7 @@ AM_CXXFLAGS = -std=c++03 -I$(top_srcdir)/include -I$(top_srcdir)/src $(MCL_CFLAG
 lib_LTLIBRARIES = libmcl.la
 include_HEADERS = include/mcl/bn.h include/mcl/bn_c384_256.h include/mcl/config.h include/mcl/curve_type.h include/mcl/fp.h include/mcl/bint.hpp src/bint_impl.hpp include/cybozu/bit_operation.hpp include/cybozu/exception.hpp include/cybozu/hash.hpp include/cybozu/itoa.hpp include/cybozu/mutex.hpp include/cybozu/random_generator.hpp include/cybozu/serializer.hpp include/cybozu/stream.hpp 
 nodist_libmcl_la_OBJECTS = src/libmcl_la-fp.lo \
-	src/libmcl_la-bn_c384_256.lo bint.lo base.lo
+	src/libmcl_la-bn_c384_256.lo
 nodist_libmcl_la_SOURCES = src/fp.cpp src/bn_c384_256.cpp
 # $(OBJ_DIR)/bint.lo $(OBJ_DIR)/base.lo
 #libmcl_la_LIBADD = -lgmp -lgmpxx
@@ -35,8 +35,8 @@ EXTRA_DIST = CHANGELOG.md COPYING readme.md
 
 
 
-bint.lo: src/bint$(BIT).ll
-	$(LIBTOOL) --mode=compile $(CXX) -c $< -o $@ $(CFLAGS)
+#bint.lo: src/bint$(BIT).ll
+#	$(LIBTOOL) --mode=compile $(CXX) -c $< -o $@ $(CFLAGS)
 
-base.lo: src/base$(BIT).ll
-	$(LIBTOOL) --mode=compile $(CXX) -c $< -o $@ $(CFLAGS)
+#base.lo: src/base$(BIT).ll
+#	$(LIBTOOL) --mode=compile $(CXX) -c $< -o $@ $(CFLAGS)
