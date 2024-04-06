@@ -188,26 +188,41 @@ bool CGROTH16::SetPi3(
 }
 
     
-    bool CGROTH16::SetK0(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    ) {
-        if (x->size() != G16_FP_SIZE_BYTES || y->size() != G16_FP_SIZE_BYTES) {
-            return false;
-        }
-
-        deserialize_g1(&vk.k[0], x->data(), x->size(), y->data(), y->size());
-        return true;
-
+bool CGROTH16::SetK0(
+    const std::vector<unsigned char>* x,
+    const std::vector<unsigned char>* y
+) {
+    if (x->size() != G16_FP_SIZE_BYTES || y->size() != G16_FP_SIZE_BYTES) {
+        return false;
     }
-    bool SetK1(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    );
-    bool SetK2(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    );
+
+    deserialize_g1(&vk.k[0], x->data(), x->size(), y->data(), y->size());
+    return true;
+
+}
+bool CGROTH16::SetK1(
+    const std::vector<unsigned char>* x,
+    const std::vector<unsigned char>* y
+) {
+    if (x->size() != G16_FP_SIZE_BYTES || y->size() != G16_FP_SIZE_BYTES) {
+        return false;
+    }
+
+    deserialize_g1(&vk.k[1], x->data(), x->size(), y->data(), y->size());
+    return true;
+}
+bool CGROTH16::SetK2(
+    const std::vector<unsigned char>* x,
+    const std::vector<unsigned char>* y
+){
+    if (x->size() != G16_FP_SIZE_BYTES || y->size() != G16_FP_SIZE_BYTES) {
+        return false;
+    }
+
+    deserialize_g1(&vk.k[2], x->data(), x->size(), y->data(), y->size());
+    return true;
+
+}
 bool CGROTH16::SetPublicInputs(
     const std::vector<unsigned char>* public_input_0,
     const std::vector<unsigned char>* public_input_1)
