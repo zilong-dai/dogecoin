@@ -1094,7 +1094,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     }else if (stack.size() < 31){
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
                     }
-                    if(mode.getint() != 1 || mode.getint() != 0){
+                    if(mode.getint() != 1 && mode.getint() != 0){
                         // todo: implement mode 2 and 3
                         return set_error(serror, SCRIPT_ERR_SIG_DER);
                     }
