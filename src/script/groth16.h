@@ -44,7 +44,7 @@ private:
     mclBnFr public_inputs[2];
 
 public:
-    CGROTH16();
+    CGROTH16(){};
 
     bool SetPi1(
         const std::vector<unsigned char>* x,
