@@ -1026,7 +1026,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     }
                 }
                 break;
-                case OP_CHECKGROTH16:
+                case OP_CHECKGROTH16VERIFY:
                 {
                     if (stack.size() < 12)
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
@@ -1037,7 +1037,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
 
                         // tx_hash mode has no public_input_1
                         upperStackOffset = 1;
-                    }else if (stack.size() < 31){
+                    }else if (stack.size() < 13){
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
                     }
                     if(mode.getint() != 1 && mode.getint() != 0){
@@ -1111,15 +1111,21 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
 
                     
                     bool fSuccess = groth16Verifier.Verify();
-
-                    for(int i=0;i<30;i++){
+                    /*
+                    // we don't modify the stack so as to be compatible with older versions
+                    for(int i=0;i<12;i++){
                         popstack(stack);
                     }
                     if(mode.getint() != 1){
                         popstack(stack); // extra value for mode 0 and 2
                     }
-
                     stack.push_back(fSuccess ? vchTrue : vchFalse);
+                    */
+                   if(!fSuccess){
+                       return set_error(serror, SCRIPT_ERR_CHECKSIGVERIFY);
+                   }
+
+                    
                 }
                 break;
 
