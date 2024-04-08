@@ -1,7 +1,11 @@
 #ifndef BITCOIN_CRYPTO_GROTH16_H
 #define BITCOIN_CRYPTO_GROTH16_H
 #include "mcl/bn_c384_256.h"
-#include <vector>
+#include <utility>
+
+
+#define G16_FP_SIZE_BYTES 48
+#define G16_FR_SIZE_BYTES 32
 
 // Proof Inputs
 typedef struct
@@ -10,7 +14,6 @@ typedef struct
     mclBnG2 pi_2; // [π₂]₂
     mclBnG1 pi_3; // [π₃]₁
 } Groth16ProofInput;
-
 
 // Minimal Verifier Key
 typedef struct
@@ -31,86 +34,53 @@ typedef struct
 } Groth16VerifierKeyPrecomputedValues;
 
 void precompute_groth16_values(
-    const Groth16VerifierKeyInput* vk,
-    Groth16VerifierKeyPrecomputedValues* vkPrecomputed);
+    const Groth16VerifierKeyInput *vk,
+    Groth16VerifierKeyPrecomputedValues *vkPrecomputed);
+
+int verify_groth16_proof_precomputed(
+    const Groth16VerifierKeyInput *vk,
+    const Groth16VerifierKeyPrecomputedValues *vkPrecomputed,
+    const Groth16ProofInput *proof,
+    const mclBnFr *publicInputs);
+int deserialize_groth16_vk(Groth16VerifierKeyInput *vk, const char *data, size_t length);
+int deserialize_groth16_proof(Groth16ProofInput *vk, mclBnFr *publicInputs, const char *data, size_t length);
 
 /** A verifier class for Groth16 BLS12-381 Zero Knoweledge Proofs. */
 class CGROTH16
 {
 private:
+public:
     Groth16ProofInput proof;
     Groth16VerifierKeyInput vk;
     Groth16VerifierKeyPrecomputedValues vk_precomputed;
     mclBnFr public_inputs[2];
-
-public:
-    CGROTH16(){
-
-    	mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
+    CGROTH16()
+    {
+        mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
     };
 
-    bool SetPi1(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
+    int DeserializeVerifierData(const char *data, size_t length);
+    int DeserializeProofData(const char *data, size_t length);
+
+    // 6 inputs
+    int SetVerifierDataCompact(
+        const std::vector<unsigned char> *a,
+        const std::vector<unsigned char> *b,
+        const std::vector<unsigned char> *c,
+        const std::vector<unsigned char> *d,
+        const std::vector<unsigned char> *e,
+        const std::vector<unsigned char> *f
     );
 
-    bool SetPi2(
-        const std::vector<unsigned char>* x_a0,
-        const std::vector<unsigned char>* x_a1,
-        const std::vector<unsigned char>* y_a0,
-        const std::vector<unsigned char>* y_a1
+    // 6 inputs
+    int SetProofDataCompact(
+        const std::vector<unsigned char> *pi_a,
+        const std::vector<unsigned char> *pi_b_0,
+        const std::vector<unsigned char> *pi_b_1,
+        const std::vector<unsigned char> *pi_c,
+        const std::vector<unsigned char> *public_input_0,
+        const std::vector<unsigned char> *public_input_1
     );
-
-    bool SetPi3(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    );
-
-
-    bool SetPublicInputs(
-        const std::vector<unsigned char>* public_input_0,
-        const std::vector<unsigned char>* public_input_1
-    );
-
-    bool SetAlpha(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    );
-
-    bool SetBeta(
-        const std::vector<unsigned char>* x_a0,
-        const std::vector<unsigned char>* x_a1,
-        const std::vector<unsigned char>* y_a0,
-        const std::vector<unsigned char>* y_a1
-    );
-
-    bool SetDelta(
-        const std::vector<unsigned char>* x_a0,
-        const std::vector<unsigned char>* x_a1,
-        const std::vector<unsigned char>* y_a0,
-        const std::vector<unsigned char>* y_a1
-    );
-
-    bool SetGamma(
-        const std::vector<unsigned char>* x_a0,
-        const std::vector<unsigned char>* x_a1,
-        const std::vector<unsigned char>* y_a0,
-        const std::vector<unsigned char>* y_a1
-    );
-    
-    bool SetK0(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    );
-    bool SetK1(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    );
-    bool SetK2(
-        const std::vector<unsigned char>* x,
-        const std::vector<unsigned char>* y
-    );
-    
 
     bool Verify();
 
