@@ -2,6 +2,21 @@
 #include <string.h>
 #include <vector>
 
+#include <stdio.h>
+#include <string>
+#include <list>
+#include <iostream>
+#include <utility>
+
+void printHexChar(const char *prefix, const char *v, size_t size, const char *suffix)
+{
+    printf("%s", prefix);
+    for (size_t i = 0; i < size; i++)
+    {
+        printf("%02x", (unsigned char)(v[i]));
+    }
+    printf("%s", suffix);
+}
 int deserialize_groth16_vk(Groth16VerifierKeyInput *vk, const char *data, size_t length)
 {
     if (length != (4 * mclBn_getG1ByteSize() + 3 * mclBn_getG2ByteSize()))
@@ -171,6 +186,7 @@ int CGROTH16::SetVerifierDataCompact(
     memcpy(data + 240, d->data(), 80);
     memcpy(data + 320, e->data(), 80);
     memcpy(data + 400, f->data(), 80);
+    printHexChar("verifier_data_hex: ", data, 480, "\n");
     return DeserializeVerifierData(data, 480);
 }
 int CGROTH16::SetProofDataCompact(
@@ -191,6 +207,7 @@ int CGROTH16::SetProofDataCompact(
     memcpy(data + G16_FP_SIZE_BYTES*3, pi_c->data(), G16_FP_SIZE_BYTES);
     memcpy(data + G16_FP_SIZE_BYTES*4, public_input_0->data(), G16_FR_SIZE_BYTES);
     memcpy(data + G16_FP_SIZE_BYTES*4+G16_FR_SIZE_BYTES, public_input_1->data(), G16_FR_SIZE_BYTES);
+    printHexChar("proof_data_hex: ", data, 256, "\n");
     return DeserializeProofData(data, 256);
     
 }
