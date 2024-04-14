@@ -1060,14 +1060,23 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
 
 
                     /*
-                    todo: drop the proof
+                    todo: drop the proof?
                     // Drop the signature in pre-segwit scripts but not segwit scripts
                     if (sigversion == SIGVERSION_BASE) {
                         scriptCode.FindAndDelete(CScript(vchSig));
                     }
                     */
                     valtype publicInput1(32); //tx
-                    //TODO: compute tx hash
+                    if(mode.getint()==1){
+                        CScript scriptCode(pbegincodehash, pend);
+                        uint256 txHash;
+                        if(!checker.GetSigHash(SIGHASH_ALL, scriptCode, sigversion, &txHash)){
+                            return set_error(serror, SCRIPT_ERR_SIG_NULLFAIL);
+                        }
+                        publicInput1.assign(txHash.begin(), txHash.end()+1);
+                        // truncate the last byte so it fits in Fr
+                        publicInput1[31] = 0; 
+                    }
 
 
 
@@ -1457,7 +1466,7 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     return true;
 }
 
-bool TransactionSignatureChecker::GetSigHash(int nHashType, const CScript& scriptCode, SigVersion sigversion, uint256 * sighashOut) 
+bool TransactionSignatureChecker::GetSigHash(int nHashType, const CScript& scriptCode, SigVersion sigversion, uint256 * sighashOut) const
 {
 
     *sighashOut = SignatureHash(scriptCode, *txTo, nIn, nHashType, amount, sigversion, this->txdata);
