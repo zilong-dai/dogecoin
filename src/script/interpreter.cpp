@@ -1091,19 +1091,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
 
                     CGROTH16 groth16Verifier = CGROTH16();
                    if(
-                        !groth16Verifier.SetVerifierDataCompact(
-                            &verfierDataA,
-                            &verfierDataB,
-                            &verfierDataC,
-                            &verfierDataD,
-                            &verfierDataE,
-                            &verfierDataF
-                        )
-                    ) {
-                        // SCRIPT_ERR_WITNESS_PUBKEYTYPE -> makes sense?
-                        return set_error(serror, SCRIPT_ERR_WITNESS_PUBKEYTYPE);
-                    }
-                   if(
                         !groth16Verifier.SetProofDataCompact(
                             &piA,
                             &piB0,
@@ -1111,6 +1098,19 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                             &piC,
                             &public_input_0,
                             &public_input_1
+                        )
+                    ) {
+                        // SCRIPT_ERR_WITNESS_PUBKEYTYPE -> makes sense?
+                        return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                    }
+                   if(
+                        !groth16Verifier.SetVerifierDataCompact(
+                            &verfierDataA,
+                            &verfierDataB,
+                            &verfierDataC,
+                            &verfierDataD,
+                            &verfierDataE,
+                            &verfierDataF
                         )
                     ) {
                         // SCRIPT_ERR_WITNESS_PUBKEYTYPE -> makes sense?
