@@ -224,7 +224,6 @@ bool CGROTH16::Verify()
     serialize_groth16_vk(&vk, data);
     printHexChar("verifier_data_hex_v: [", data, 480, "]\n");
     int result = verify_groth16_proof(&vk, &proof, public_inputs);
-    printf("result: %i",result);
     
     return result == 1;
 }
