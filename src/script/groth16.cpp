@@ -10,12 +10,12 @@
 
 void printHexChar(const char *prefix, const char *v, size_t size, const char *suffix)
 {
-    /*printf("%s", prefix);
+    printf("%s", prefix);
     for (size_t i = 0; i < size; i++)
     {
         printf("%02x", (unsigned char)(v[i]));
     }
-    printf("%s", suffix);*/
+    printf("%s", suffix);
 }
 int deserialize_groth16_vk(Groth16VerifierKeyInput *vk, const char *data, size_t length)
 {
