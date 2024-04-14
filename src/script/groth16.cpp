@@ -266,7 +266,7 @@ int CGROTH16::SetProofDataCompact(
     const std::vector<unsigned char> *public_input_1
 ){
     if(pi_a->size() != G16_FP_SIZE_BYTES || pi_b_0->size() != G16_FP_SIZE_BYTES || pi_b_1->size() != G16_FP_SIZE_BYTES || pi_c->size() != G16_FP_SIZE_BYTES || public_input_0->size() != G16_FR_SIZE_BYTES || public_input_1->size() != G16_FR_SIZE_BYTES){
-        printf("bad size pi_a->size(): %d pi_b_0->size(): %d pi_b_1->size(): %d pi_c->size(): %d public_input_0->size(): %d public_input_1->size(): %d\n", pi_a->size(), pi_b_0->size(), pi_b_1->size(), pi_c->size(), public_input_0->size(),public_input_1->size());
+        printf("bad size pi_a->size(): %lu pi_b_0->size(): %lu pi_b_1->size(): %lu pi_c->size(): %lu public_input_0->size(): %lu public_input_1->size(): %lu\n", pi_a->size(), pi_b_0->size(), pi_b_1->size(), pi_c->size(), public_input_0->size(),public_input_1->size());
         return 0;
     }
     char data[256] = {0};
