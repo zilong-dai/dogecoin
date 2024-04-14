@@ -1,12 +1,13 @@
 #include "groth16.h"
 #include <string.h>
 #include <vector>
-
+/*
 #include <stdio.h>
 #include <string>
 #include <list>
 #include <iostream>
 #include <utility>
+*/
 
 void printHexChar(const char *prefix, const char *v, size_t size, const char *suffix)
 {
