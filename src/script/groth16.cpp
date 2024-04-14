@@ -219,7 +219,7 @@ bool CGROTH16::Verify()
     serialize_groth16_proof(&proof, public_inputs, data);
     printHexChar("proof_data_hex_v: [", data, 256, "]\n");
     serialize_groth16_vk(&vk, data);
-    printHexChar("verifier_data_hex_v: [", data, 256, "]\n");
+    printHexChar("verifier_data_hex_v: [", data, 480, "]\n");
     int result = verify_groth16_proof(&vk, &proof, public_inputs);
     printf("result: %i",result);
     
