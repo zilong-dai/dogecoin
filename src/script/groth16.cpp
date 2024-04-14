@@ -10,12 +10,14 @@
 
 void printHexChar(const char *prefix, const char *v, size_t size, const char *suffix)
 {
+    /*
     printf("%s", prefix);
     for (size_t i = 0; i < size; i++)
     {
         printf("%02x", (unsigned char)(v[i]));
     }
     printf("%s", suffix);
+    */
 }
 int deserialize_groth16_vk(Groth16VerifierKeyInput *vk, const char *data, size_t length)
 {
@@ -244,8 +246,8 @@ int CGROTH16::SetVerifierDataCompact(
     const std::vector<unsigned char> *e,
     const std::vector<unsigned char> *f
 ){
-    printf("hi vdata\n");
-    printf("got sizes: a->size(): %lu, b->size(): %lu, c->size(): %lu, d->size(): %lu, e->size(): %lu, f->size(): %lu ",a->size() ,b->size() ,c->size() ,d->size() ,e->size() ,f->size());
+    //printf("hi vdata\n");
+    //printf("got sizes: a->size(): %lu, b->size(): %lu, c->size(): %lu, d->size(): %lu, e->size(): %lu, f->size(): %lu ",a->size() ,b->size() ,c->size() ,d->size() ,e->size() ,f->size());
 
     if(a->size() != 80 || b->size() != 80 || c->size() != 80 || d->size() != 80 || e->size() != 80 || f->size() != 80){
         return 0;
@@ -268,12 +270,12 @@ int CGROTH16::SetProofDataCompact(
     const std::vector<unsigned char> *public_input_0,
     const std::vector<unsigned char> *public_input_1
 ){
-    printf("hi proof data\n");
-    printf("size pi_a->size(): %lu pi_b_0->size(): %lu pi_b_1->size(): %lu pi_c->size(): %lu public_input_0->size(): %lu public_input_1->size(): %lu\n", pi_a->size(), pi_b_0->size(), pi_b_1->size(), pi_c->size(), public_input_0->size(),public_input_1->size());
+    //printf("hi proof data\n");
+    //printf("size pi_a->size(): %lu pi_b_0->size(): %lu pi_b_1->size(): %lu pi_c->size(): %lu public_input_0->size(): %lu public_input_1->size(): %lu\n", pi_a->size(), pi_b_0->size(), pi_b_1->size(), pi_c->size(), public_input_0->size(),public_input_1->size());
 
 
     if(pi_a->size() != G16_FP_SIZE_BYTES || pi_b_0->size() != G16_FP_SIZE_BYTES || pi_b_1->size() != G16_FP_SIZE_BYTES || pi_c->size() != G16_FP_SIZE_BYTES || public_input_0->size() != G16_FR_SIZE_BYTES || public_input_1->size() != G16_FR_SIZE_BYTES){
-        printf("bad size pi_a->size(): %lu pi_b_0->size(): %lu pi_b_1->size(): %lu pi_c->size(): %lu public_input_0->size(): %lu public_input_1->size(): %lu\n", pi_a->size(), pi_b_0->size(), pi_b_1->size(), pi_c->size(), public_input_0->size(),public_input_1->size());
+        //printf("bad size pi_a->size(): %lu pi_b_0->size(): %lu pi_b_1->size(): %lu pi_c->size(): %lu public_input_0->size(): %lu public_input_1->size(): %lu\n", pi_a->size(), pi_b_0->size(), pi_b_1->size(), pi_c->size(), public_input_0->size(),public_input_1->size());
         return 0;
     }
     char data[256] = {0};
