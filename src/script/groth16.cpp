@@ -52,6 +52,65 @@ int deserialize_groth16_vk(Groth16VerifierKeyInput *vk, const char *data, size_t
     ptr += tmp;
     return ptr - data;
 }
+int serialize_groth16_vk(const Groth16VerifierKeyInput *vk, char *data)
+{
+    char *ptr = data;
+    size_t tmp = mclBnG1_serialize(data, G16_FP_SIZE_BYTES, &vk->alpha);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG1_serialize(data, G16_FP_SIZE_BYTES, &vk->k[0]);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG1_serialize(data, G16_FP_SIZE_BYTES, &vk->k[1]);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG1_serialize(data, G16_FP_SIZE_BYTES, &vk->k[2]);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG2_serialize(data, G16_FP_SIZE_BYTES * 2, &vk->beta);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG2_serialize(data, G16_FP_SIZE_BYTES * 2, &vk->delta);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG2_serialize(data, G16_FP_SIZE_BYTES * 2, &vk->gamma);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    return ptr - data;
+}
+int serialize_groth16_proof(const Groth16ProofInput *vk, const mclBnFr *publicInputs, char *data)
+{
+    char *ptr = data;
+    size_t tmp = mclBnG1_serialize(data, G16_FP_SIZE_BYTES, &vk->pi_1);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG2_serialize(data, G16_FP_SIZE_BYTES * 2, &vk->pi_2);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnG1_serialize(data, G16_FP_SIZE_BYTES, &vk->pi_3);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnFr_serialize(data, G16_FR_SIZE_BYTES, &publicInputs[0]);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    tmp = mclBnFr_serialize(data, G16_FR_SIZE_BYTES, &publicInputs[1]);
+    if (tmp == 0)
+        return 0;
+    data += tmp;
+    return ptr - data;
+}
+
 
 
 
@@ -155,7 +214,16 @@ int verify_groth16_proof(
 
 bool CGROTH16::Verify()
 {
-    return verify_groth16_proof(&vk, &proof, public_inputs) == 1;
+
+    char data[480] = {0};
+    serialize_groth16_proof(&proof, public_inputs, data);
+    printHexChar("proof_data_hex_v: [", data, 256, "]\n");
+    serialize_groth16_vk(&vk, data);
+    printHexChar("verifier_data_hex_v: [", data, 256, "]\n");
+    int result = verify_groth16_proof(&vk, &proof, public_inputs);
+    printf("result: %i",result);
+    
+    return result == 1;
 }
 
 int CGROTH16::DeserializeVerifierData(const char *data, size_t length)
