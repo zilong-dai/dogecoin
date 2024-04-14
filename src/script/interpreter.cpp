@@ -1073,7 +1073,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                         if(!checker.GetSigHash(SIGHASH_ALL, scriptCode, sigversion, &txHash)){
                             return set_error(serror, SCRIPT_ERR_SIG_NULLFAIL);
                         }
-                        publicInput1.assign(txHash.begin(), txHash.end()+1);
+                        publicInput1.assign(txHash.begin(), txHash.end());
                         // truncate the last byte so it fits in Fr
                         publicInput1[31] = 0; 
                     }
