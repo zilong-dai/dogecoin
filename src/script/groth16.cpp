@@ -9,6 +9,8 @@
 #include <utility>
 */
 
+bool CGROTH16::library_initialized = false;
+
 void printHexChar(const char *prefix, const char *v, size_t size, const char *suffix)
 {
     /*

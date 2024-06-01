@@ -1075,7 +1075,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                         }
                         publicInput1.assign(txHash.begin(), txHash.end());
                         // truncate the last byte so it fits in Fr
-                        publicInput1[31] = 0; 
+                        publicInput1[31] = 0;//publicInput1[31]&0xf; 
                     }
 
 

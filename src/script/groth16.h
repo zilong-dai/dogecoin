@@ -49,6 +49,7 @@ int deserialize_groth16_proof(Groth16ProofInput *vk, mclBnFr *publicInputs, cons
 class CGROTH16
 {
 private:
+    static bool library_initialized;
 public:
     Groth16ProofInput proof;
     Groth16VerifierKeyInput vk;
@@ -56,7 +57,10 @@ public:
     mclBnFr public_inputs[2];
     CGROTH16()
     {
-        mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
+        if(!CGROTH16::library_initialized){
+            CGROTH16::library_initialized = true;
+            mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
+        }
     };
 
     int DeserializeVerifierData(const char *data, size_t length);
