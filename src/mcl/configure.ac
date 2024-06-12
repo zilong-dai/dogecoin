@@ -6,7 +6,7 @@ define(_PKG_VERSION_BUILD, 0)
 define(_PKG_VERSION_IS_RELEASE, false)
 
 define(_LIB_VERSION_CURRENT, 1)
-define(_LIB_VERSION_REVISION, 74)
+define(_LIB_VERSION_REVISION, 93)
 define(_LIB_VERSION_AGE, 0)
 AC_INIT([libmcl], m4_join([.], _PKG_VERSION_MAJOR, _PKG_VERSION_MINOR, _PKG_VERSION_BUILD)m4_if(_PKG_VERSION_IS_RELEASE, [true], [], [-pre]), [https://github.com/herumi/mcl/issues], [libmcl], [https://github.com/herumi/mcl])
 OBJ_DIR=obj
