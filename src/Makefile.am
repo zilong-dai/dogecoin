@@ -108,6 +108,7 @@ BITCOIN_CORE_H = \
   dogecoin.h \
   dogecoin-fees.cpp \
   dogecoin-fees.h \
+  fs.h \
   httprpc.h \
   httpserver.h \
   indirectmap.h \
@@ -259,6 +260,8 @@ crypto_libdogecoin_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libdogecoin_crypto_a_SOURCES = \
   crypto/aes.cpp \
   crypto/aes.h \
+  crypto/chacha20.h \
+  crypto/chacha20.cpp \
   crypto/common.h \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
@@ -358,6 +361,7 @@ libdogecoin_util_a_SOURCES = \
   compat/glibc_sanity.cpp \
   compat/glibcxx_sanity.cpp \
   compat/strnlen.cpp \
+  fs.cpp \
   random.cpp \
   rpc/protocol.cpp \
   support/cleanse.cpp \
