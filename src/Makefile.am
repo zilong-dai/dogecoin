@@ -2,11 +2,17 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-DIST_SUBDIRS = secp256k1 univalue mcl
+DIST_SUBDIRS = secp256k1 univalue 
 
-AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
+BLS12_381_HOME = $(top_srcdir)/external/bls12-381
+BLS12_381_LIBS = $(BLS12_381_HOME)/build/libbls12-381.a
+BLS12_381_INCLUDES = $(BLS12_381_HOME)/include
+
+# modified by tyree
+AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS) $(BLS12_381_LIBS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS) $(ERROR_CXXFLAGS)
-AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
+#tyree modified
+AM_CPPFLAGS = $(HARDENED_CPPFLAGS) -I$(BLS12_381_INCLUDES)
 EXTRA_LIBRARIES =
 
 if EMBEDDED_UNIVALUE
@@ -21,7 +27,7 @@ endif
 BITCOIN_CONFIG_INCLUDES=-I$(builddir)/config
 BITCOIN_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
-BITCOIN_INCLUDES += -I$(srcdir)/secp256k1/include -I$(srcdir)/mcl/include -I$(srcdir)/mcl/src
+BITCOIN_INCLUDES += -I$(srcdir)/secp256k1/include
 BITCOIN_INCLUDES += $(UNIVALUE_CFLAGS)
 
 LIBDOGECOIN_SERVER=libdogecoin_server.a
@@ -32,7 +38,6 @@ LIBDOGECOIN_UTIL=libdogecoin_util.a
 LIBDOGECOIN_CRYPTO=crypto/libdogecoin_crypto.a
 LIBDOGECOINQT=qt/libdogecoinqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
-LIBMCL=mcl/libmcl.la
 
 if ENABLE_ZMQ
 LIBDOGECOIN_ZMQ=libdogecoin_zmq.a
@@ -47,8 +52,6 @@ endif
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
-$(LIBMCL): $(wildcard mcl/src/*) $(wildcard mcl/include/*)
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
 # But to build the less dependent modules first, we manually select their order here:
@@ -77,7 +80,7 @@ if BUILD_BITCOIN_UTILS
   bin_PROGRAMS += dogecoin-cli dogecoin-tx
 endif
 
-.PHONY: FORCE check-symbols check-security
+.PHONY: FORCE check-symbols check-security check_bl12_381_paths
 # bitcoin core #
 BITCOIN_CORE_H = \
   addrdb.h \
@@ -314,8 +317,6 @@ libdogecoin_consensus_a_SOURCES = \
   script/script.h \
   script/script_error.cpp \
   script/script_error.h \
-  script/groth16.cpp \
-  script/groth16.h \
   serialize.h \
   tinyformat.h \
   uint256.cpp \
@@ -414,7 +415,7 @@ dogecoind_LDADD = \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
   $(LIBSECP256K1) \
-  $(LIBMCL)
+  $(BLS12_381_LIBS)
 
 dogecoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
@@ -453,8 +454,7 @@ dogecoin_tx_LDADD = \
   $(LIBDOGECOIN_UTIL) \
   $(LIBDOGECOIN_CONSENSUS) \
   $(LIBDOGECOIN_CRYPTO) \
-  $(LIBSECP256K1) \
-  $(LIBMCL)
+  $(LIBSECP256K1)
 
 dogecoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
@@ -469,8 +469,8 @@ if GLIBC_BACK_COMPAT
 endif
 
 libdogecoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libdogecoinconsensus_la_LIBADD = $(LIBSECP256K1) $(LIBMCL)
-libdogecoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -I$(srcdir)/mcl/include -I$(srcdir)/mcl/src -DBUILD_BITCOIN_INTERNAL
+libdogecoinconsensus_la_LIBADD = $(LIBSECP256K1)
+libdogecoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
 libdogecoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
@@ -511,7 +511,6 @@ $(top_srcdir)/$(subdir)/config/bitcoin-config.h.in:  $(am__configure_deps)
 
 clean-local:
 	-$(MAKE) -C secp256k1 clean
-	-$(MAKE) -C mcl clean
 	-$(MAKE) -C univalue clean
 	-rm -f leveldb/*/*.gcda leveldb/*/*.gcno leveldb/helpers/memenv/*.gcda leveldb/helpers/memenv/*.gcno
 	-rm -f config.h
@@ -531,6 +530,26 @@ if HARDEN
 	@echo "Checking binary security..."
 	$(AM_V_at) $(PYTHON) $(top_srcdir)/contrib/devtools/security-check.py $(bin_PROGRAMS)
 endif
+
+check_bl12_381_paths:
+    @echo "BLS12_381_HOME: $(BLS12_381_HOME)"
+    @echo "BLS12_381_LIBS: $(BLS12_381_LIBS)"
+    @echo "BLS12_381_INCLUDES: $(BLS12_381_INCLUDES)"
+
+    @if [ ! -d "$(BLS12_381_HOME)" ]; then \
+        echo "Error: Directory $(BLS12_381_HOME) does not exist."; \
+        exit 1; \
+    fi
+
+    @if [ ! -f "$(BLS12_381_LIBS)" ]; then \
+        echo "Error: Library file $(BLS12_381_LIBS) does not exist."; \
+        exit 1; \
+    fi
+
+    @if [ ! -d "$(BLS12_381_INCLUDES)" ]; then \
+        echo "Error: Include directory $(BLS12_381_INCLUDES) does not exist."; \
+        exit 1; \
+    fi
 
 %.pb.cc %.pb.h: %.proto
 	@test -f $(PROTOC)

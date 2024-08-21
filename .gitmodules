@@ -1,0 +1,3 @@
+[submodule "external/bls12-381"]
+	path = external/bls12-381
+	url = git@github.com:zilong-dai/bls12-381.git

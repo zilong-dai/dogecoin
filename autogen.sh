@@ -13,3 +13,17 @@ fi
 which autoreconf >/dev/null || \
   (echo "configuration failed, please install autoconf first" && exit 1)
 autoreconf --install --force --warnings=all
+
+
+
+# 编译 bls12-381 库
+cd external/bls12-381
+mkdir -p build
+cd build
+cmake ..
+make
+
+# 返回到主目录
+cd ../../..
+
+echo "BLS12-381 library built successfully."
