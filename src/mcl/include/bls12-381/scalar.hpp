@@ -5,7 +5,7 @@
 #include <cstring>
 #include <polyfills/span.hpp>
 #include <stdexcept>
-#include <bit>
+// #include <bit>
 // #include <string_view>
 
 #include <bls12-381/fp.hpp>

@@ -6,7 +6,7 @@
 #include <tuple>
 #include <polyfills/optional.hpp>
 #include <polyfills/span.hpp>
-#include <compare>
+// #include <compare>
 
 namespace bls12_381
 {
