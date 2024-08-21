@@ -9,11 +9,10 @@
 #include "crypto/ripemd160.h"
 #include "crypto/sha1.h"
 #include "crypto/sha256.h"
-#include "script/groth16.h"
+#include "groth16/groth16.hpp"
 #include "pubkey.h"
 #include "script/script.h"
 #include "uint256.h"
-#include <mcl/bn_c384_256.h>
 
 using namespace std;
 
@@ -1089,37 +1088,22 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     valtype& piA = stacktop(-13+upperStackOffset);
                     
 
-                    CGROTH16 groth16Verifier = CGROTH16();
-                   if(
-                        !groth16Verifier.SetProofDataCompact(
-                            &piA,
-                            &piB0,
-                            &piB1,
-                            &piC,
-                            &public_input_0,
-                            &public_input_1
-                        )
-                    ) {
-                        // SCRIPT_ERR_WITNESS_PUBKEYTYPE -> makes sense?
+                    bls12_381_groth16::Groth16ProofWith2PublicInputs proof;
+                    bls12_381_groth16::Groth16VerifierKeyInput vk;
+                    bls12_381_groth16::Groth16VerifierKeyPrecomputedValues precomputed;
+                    if(!bls12_381_groth16::deserializeProofWith2PublicInputs(&proof, &piA, &piB0, &piB1, &piC, &public_input_0, &public_input_1)){
                         return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
                     }
-                   if(
-                        !groth16Verifier.SetVerifierDataCompact(
-                            &verfierDataA,
-                            &verfierDataB,
-                            &verfierDataC,
-                            &verfierDataD,
-                            &verfierDataE,
-                            &verfierDataF
-                        )
-                    ) {
-                        // SCRIPT_ERR_WITNESS_PUBKEYTYPE -> makes sense?
-                        return set_error(serror, SCRIPT_ERR_WITNESS_PUBKEYTYPE);
+                    
+                    if(!bls12_381_groth16::deserializeVerifierKeyInput(&vk, &verfierDataA, &verfierDataB, &verfierDataC, &verfierDataD, &verfierDataE, &verfierDataF)){
+                        return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
                     }
                     
-
+                    if(!bls12_381_groth16::precomputeVerifierKey(&precomputed, &vk)){
+                        return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                    }
                     
-                    bool fSuccess = groth16Verifier.Verify();
+                    int fSuccess = bls12_381_groth16::verifyProofWith2PublicInputs(&proof, &vk, &precomputed);
                     /*
                     // we don't modify the stack so as to be compatible with older versions
                     for(int i=0;i<12;i++){

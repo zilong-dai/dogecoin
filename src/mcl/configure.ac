@@ -35,7 +35,7 @@ AC_CANONICAL_HOST
 case "$host_os" in
     *mingw64*)
         AC_DEFINE([MINGW64], [1], [Define to 1 if on MinGW-W64])
-        CFLAGS="$CFLAGS -D__USE_MINGW_ANSI_STDIO=1"
+        CXXFLAGS="$CXXFLAGS -D__USE_MINGW_ANSI_STDIO=1"
         LDFLAGS="$LDFLAGS -lrt"
         ;;
     *cygwin*)
@@ -47,17 +47,17 @@ case "$host_os" in
         ;;
     *openbsd*)
         AC_DEFINE([OPENBSD], [1], [Define if on OpenBSD])
-        CFLAGS="$CFLAGS -I/usr/local/include"
+        CXXFLAGS="$CXXFLAGS -I/usr/local/include"
         LDFLAGS="$LDFLAGS -lrt -L/usr/local/lib"
         ;;
     *freebsd*)
         AC_DEFINE([FREEBSD], [1], [Define if on FreeBSD])
-        CFLAGS="$CFLAGS -I/usr/local/include"
+        CXXFLAGS="$CXXFLAGS -I/usr/local/include"
         LDFLAGS="$LDFLAGS -L/usr/local/lib"
         ;;
     *linux*)
         AC_DEFINE([LINUX], [1], [Define if on Linux])
-        CFLAGS="$CFLAGS -I/usr/local/include"
+        CXXFLAGS="$CXXFLAGS -I/usr/local/include"
         LDFLAGS="$LDFLAGS -L/usr/local/lib"
         ;;
 esac
@@ -85,12 +85,12 @@ esac
 MCL_SIZEOF_UNIT=`expr $BIT / 8`
 MCL_MAX_BIT_SIZE=384
 
-CFLAGS_WARN="-Wall -Wextra -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings -Wfloat-equal -Wpointer-arith -Wundef"
-MCL_CFLAGS="-DMCL_NO_AUTOLINK -DMCLBN_NO_AUTOLINK -DMCL_USE_LLVM=1 -DMCL_SIZEOF_UNIT=$MCL_SIZEOF_UNIT -DMCL_MAX_BIT_SIZE=$MCL_MAX_BIT_SIZE"
-CFLAGS="$CFLAGS $BIT_OPT $CFLAGS_WARN $MCL_CFLAGS -I include -I src"
+CXXFLAGS_WARN="-Wall -Wextra -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings -Wfloat-equal -Wpointer-arith -Wundef"
+MCL_CXXFLAGS="-DMCL_NO_AUTOLINK -DMCLBN_NO_AUTOLINK -DMCL_USE_LLVM=1 -DMCL_SIZEOF_UNIT=$MCL_SIZEOF_UNIT -DMCL_MAX_BIT_SIZE=$MCL_MAX_BIT_SIZE"
+CXXFLAGS="$CXXFLAGS $BIT_OPT $CXXFLAGS_WARN -I include -I src"
 LDFLAGS="$LDFLAGS $BIT_OPT"
 
-AC_SUBST(CFLAGS)
+AC_SUBST(CXXFLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(BIT)
 AC_SUBST(CXX)
@@ -107,7 +107,6 @@ echo "  target os     = $TARGET_OS"
 echo "  build os      = $BUILD_OS"
 echo
 echo "  CC            = $CC"
-echo "  CFLAGS        = $CFLAGS"
 echo "  CPPFLAGS      = $CPPFLAGS"
 echo "  CXX           = $CXX"
 echo "  CXXFLAGS      = $CXXFLAGS"
