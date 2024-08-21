@@ -16,14 +16,15 @@ autoreconf --install --force --warnings=all
 
 
 
-# 编译 bls12-381 库
+echo "Building BLS12-381 library..."
+# Compile the bls12-381 library
 cd external/bls12-381
 mkdir -p build
 cd build
 cmake ..
 make
 
-# 返回到主目录
+# return to the root directory
 cd ../../..
 
 echo "BLS12-381 library built successfully."

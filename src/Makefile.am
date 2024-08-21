@@ -4,15 +4,13 @@
 
 DIST_SUBDIRS = secp256k1 univalue 
 
-BLS12_381_HOME = $(top_srcdir)/external/bls12-381
-BLS12_381_LIBS = $(BLS12_381_HOME)/build/libbls12-381.a
-BLS12_381_INCLUDES = $(BLS12_381_HOME)/include
+LIBBLS12_381_HOME = $(top_srcdir)/external/bls12-381
+LIBBLS12_381 = $(LIBBLS12_381_HOME)/build/libbls12-381.a
+LIBBLS12_381_INCLUDES = $(LIBBLS12_381_HOME)/include
 
-# modified by tyree
-AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS) $(BLS12_381_LIBS)
+AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS) $(ERROR_CXXFLAGS)
-#tyree modified
-AM_CPPFLAGS = $(HARDENED_CPPFLAGS) -I$(BLS12_381_INCLUDES)
+AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
 EXTRA_LIBRARIES =
 
 if EMBEDDED_UNIVALUE
@@ -80,7 +78,7 @@ if BUILD_BITCOIN_UTILS
   bin_PROGRAMS += dogecoin-cli dogecoin-tx
 endif
 
-.PHONY: FORCE check-symbols check-security check_bl12_381_paths
+.PHONY: FORCE check-symbols check-security
 # bitcoin core #
 BITCOIN_CORE_H = \
   addrdb.h \
@@ -415,7 +413,7 @@ dogecoind_LDADD = \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
   $(LIBSECP256K1) \
-  $(BLS12_381_LIBS)
+  $(LIBBLS12_381)
 
 dogecoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
@@ -454,10 +452,10 @@ dogecoin_tx_LDADD = \
   $(LIBDOGECOIN_UTIL) \
   $(LIBDOGECOIN_CONSENSUS) \
   $(LIBDOGECOIN_CRYPTO) \
-  $(LIBSECP256K1)
+  $(LIBSECP256K1) \
+  $(LIBBLS12_381)
 
 dogecoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
-#
 
 # bitcoinconsensus library #
 if BUILD_BITCOIN_LIBS
@@ -468,9 +466,9 @@ if GLIBC_BACK_COMPAT
   libdogecoinconsensus_la_SOURCES += compat/glibc_compat.cpp
 endif
 
-libdogecoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libdogecoinconsensus_la_LIBADD = $(LIBSECP256K1)
-libdogecoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
+libdogecoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS) -l$(LIBBLS12_381)
+libdogecoinconsensus_la_LIBADD  = $(LIBSECP256K1)
+libdogecoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL -I$(LIBBLS12_381_INCLUDES)
 libdogecoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
@@ -530,26 +528,6 @@ if HARDEN
 	@echo "Checking binary security..."
 	$(AM_V_at) $(PYTHON) $(top_srcdir)/contrib/devtools/security-check.py $(bin_PROGRAMS)
 endif
-
-check_bl12_381_paths:
-    @echo "BLS12_381_HOME: $(BLS12_381_HOME)"
-    @echo "BLS12_381_LIBS: $(BLS12_381_LIBS)"
-    @echo "BLS12_381_INCLUDES: $(BLS12_381_INCLUDES)"
-
-    @if [ ! -d "$(BLS12_381_HOME)" ]; then \
-        echo "Error: Directory $(BLS12_381_HOME) does not exist."; \
-        exit 1; \
-    fi
-
-    @if [ ! -f "$(BLS12_381_LIBS)" ]; then \
-        echo "Error: Library file $(BLS12_381_LIBS) does not exist."; \
-        exit 1; \
-    fi
-
-    @if [ ! -d "$(BLS12_381_INCLUDES)" ]; then \
-        echo "Error: Include directory $(BLS12_381_INCLUDES) does not exist."; \
-        exit 1; \
-    fi
 
 %.pb.cc %.pb.h: %.proto
 	@test -f $(PROTOC)
