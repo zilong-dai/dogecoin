@@ -1027,23 +1027,28 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                 break;
                 case OP_CHECKGROTH16VERIFY:
                 {
+                    // Ensure stack has enough elements for the groth16 proof verification
                     if (stack.size() < 12)
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
 
+                    // Retrieve the mode from the top of the stack
                     CScriptNum mode(stacktop(-1), fRequireMinimal);
                     size_t upperStackOffset = 0;
-                    if(mode.getint() == 1){
 
-                        // tx_hash mode has no public_input_1
+                    // Handle different modes
+                    if(mode.getint() == 1){
+                        //  Mode 1: tx_hash mode, has no public_input_1
                         upperStackOffset = 1;
                     }else if (stack.size() < 13){
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
                     }
+
+                    // Only modes 0 and 1 are implemented; others return an error
                     if(mode.getint() != 1 && mode.getint() != 0){
-                        // todo: implement mode 2 and 3
+                        // TODO: Implement mode 2 and 3
                         return set_error(serror, SCRIPT_ERR_SIG_DER);
                     }
-                    
+                    // Retrieve verifier data from the stack
                     valtype& verfierDataF = stacktop(-2);
                     valtype& verfierDataE = stacktop(-3);
                     valtype& verfierDataD = stacktop(-4);
@@ -1051,21 +1056,13 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     valtype& verfierDataB = stacktop(-6);
                     valtype& verfierDataA = stacktop(-7);
 
-                    
-                    // Subset of script starting at the most recent codeseparator
-                    //CScript scriptCode(pbegincodehash, pend);
-
-
-
-
-                    /*
-                    todo: drop the proof?
+                    /* TODO: drop the proof?
                     // Drop the signature in pre-segwit scripts but not segwit scripts
                     if (sigversion == SIGVERSION_BASE) {
                         scriptCode.FindAndDelete(CScript(vchSig));
                     }
                     */
-                    valtype publicInput1(32); //tx
+                    valtype publicInput1(32); // Initialize a 32-byte array for tx_hash
                     if(mode.getint()==1){
                         CScript scriptCode(pbegincodehash, pend);
                         uint256 txHash;
@@ -1073,12 +1070,11 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                             return set_error(serror, SCRIPT_ERR_SIG_NULLFAIL);
                         }
                         publicInput1.assign(txHash.begin(), txHash.end());
-                        // truncate the last byte so it fits in Fr
+                        // Truncate the last byte to fit into Fr
                         publicInput1[31] = 0;//publicInput1[31]&0xf; 
                     }
 
-
-
+                    // Retrieve public inputs and proof elements from the stack
                     // cut off for witness, if mode is 1, then public_input_1 is the current tx_hash instead of a public input
                     valtype& public_input_1 = mode.getint()==1?publicInput1:stacktop(-8);
                     valtype& public_input_0 = stacktop(-9+upperStackOffset);
@@ -1086,27 +1082,32 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     valtype& piB1 = stacktop(-11+upperStackOffset);
                     valtype& piB0 = stacktop(-12+upperStackOffset);
                     valtype& piA = stacktop(-13+upperStackOffset);
-                    
 
+                    // Deserialize the proof and verifier key input
                     bls12_381_groth16::Groth16ProofWith2PublicInputs proof;
                     bls12_381_groth16::Groth16VerifierKeyInput vk;
                     bls12_381_groth16::Groth16VerifierKeyPrecomputedValues precomputed;
+
+                    // Check the proof and verifier key deserialization
                     if(!bls12_381_groth16::deserializeProofWith2PublicInputs(&proof, &piA, &piB0, &piB1, &piC, &public_input_0, &public_input_1)){
                         return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
                     }
-                    
+
                     if(!bls12_381_groth16::deserializeVerifierKeyInput(&vk, &verfierDataA, &verfierDataB, &verfierDataC, &verfierDataD, &verfierDataE, &verfierDataF)){
                         return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
                     }
-                    
+
+                    // Precompute the verifier key
                     if(!bls12_381_groth16::precomputeVerifierKey(&precomputed, &vk)){
                         return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
                     }
-                    
+
+                    // Verify the proof
                     int fSuccess = bls12_381_groth16::verifyProofWith2PublicInputs(&proof, &vk, &precomputed);
+
                     /*
-                    // we don't modify the stack so as to be compatible with older versions
-                    for(int i=0;i<12;i++){
+                    // To be compatible with older versions, we do not modify the stack
+                    for(int i = 0; i < 12; i++){
                         popstack(stack);
                     }
                     if(mode.getint() != 1){
@@ -1114,11 +1115,10 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     }
                     stack.push_back(fSuccess ? vchTrue : vchFalse);
                     */
-                   if(!fSuccess){
+                    // Check the result of the verification
+                    if(!fSuccess){
                        return set_error(serror, SCRIPT_ERR_CHECKSIGVERIFY);
-                   }
-
-                    
+                    }
                 }
                 break;
 
