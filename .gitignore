@@ -10,6 +10,18 @@ src/test/test_dogecoin_fuzzy
 src/qt/test/test_dogecoin-qt
 src/bench/bench_dogecoin
 
+src/bls12-381/build/
+src/bls12-381/build-aux/
+src/bls12-381/src/config.h.in
+
+src/bls12-381/build-aux/ltmain.sh
+src/bls12-381/build-aux/m4/libtool.m4
+src/bls12-381/build-aux/m4/ltoptions.m4
+src/bls12-381/build-aux/m4/ltsugar.m4
+src/bls12-381/build-aux/m4/ltversion.m4
+src/bls12-381/build-aux/m4/lt~obsolete.m4
+
+
 # autoreconf
 Makefile.in
 aclocal.m4
