@@ -5,9 +5,9 @@ includedir=@includedir@
 
 Name: libmcl
 Description: Pairing Library
-URL: https://github.com/QEDProtocol/mcl
+URL: https://github.com/QEDProtocol/bls12-381
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lmcl
-Libs.private: @MCL_LIBS@
+Libs: -L${libdir} -lbls
+Libs.private: @BLS_LIBS@
 

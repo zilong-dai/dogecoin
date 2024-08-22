@@ -8,7 +8,7 @@ define(_PKG_VERSION_IS_RELEASE, false)
 define(_LIB_VERSION_CURRENT, 1)
 define(_LIB_VERSION_REVISION, 93)
 define(_LIB_VERSION_AGE, 0)
-AC_INIT([libmcl], m4_join([.], _PKG_VERSION_MAJOR, _PKG_VERSION_MINOR, _PKG_VERSION_BUILD)m4_if(_PKG_VERSION_IS_RELEASE, [true], [], [-pre]), [https://github.com/herumi/mcl/issues], [libmcl], [https://github.com/herumi/mcl])
+AC_INIT([libbls], m4_join([.], _PKG_VERSION_MAJOR, _PKG_VERSION_MINOR, _PKG_VERSION_BUILD)m4_if(_PKG_VERSION_IS_RELEASE, [true], [], [-pre]), [https://github.com/QEDProtocol/bls12-381/issues], [libbls], [https://github.com/QEDProtocol/bls12-381])
 OBJ_DIR=obj
 AC_SUBST(OBJ_DIR)
 AC_SUBST(LIB_VERSION_CURRENT, _LIB_VERSION_CURRENT)
@@ -36,19 +36,17 @@ case "$host_os" in
     *mingw64*)
         AC_DEFINE([MINGW64], [1], [Define to 1 if on MinGW-W64])
         CXXFLAGS="$CXXFLAGS -D__USE_MINGW_ANSI_STDIO=1"
-        LDFLAGS="$LDFLAGS -lrt"
         ;;
     *cygwin*)
         AC_DEFINE([CYGWIN], [1], [Define if on Cygwin])
         ;;
     *darwin*)
         AC_DEFINE([DARWIN], [1], [Define if on Darwin/Mac OS X])
-        LDFLAGS="$LDFLAGS -lrt"
         ;;
     *openbsd*)
         AC_DEFINE([OPENBSD], [1], [Define if on OpenBSD])
         CXXFLAGS="$CXXFLAGS -I/usr/local/include"
-        LDFLAGS="$LDFLAGS -lrt -L/usr/local/lib"
+        LDFLAGS="$LDFLAGS -L/usr/local/lib"
         ;;
     *freebsd*)
         AC_DEFINE([FREEBSD], [1], [Define if on FreeBSD])
@@ -61,44 +59,18 @@ case "$host_os" in
         LDFLAGS="$LDFLAGS -L/usr/local/lib"
         ;;
 esac
-case "$host_cpu" in
-    x86_64)
-        AC_DEFINE([ARCH_X86_64], [1], [Define if on x86_64])
-        BIT=64
-        BIT_OPT=-m64
-        ;;
-    i386|i486|i586|i686)
-        AC_DEFINE([ARCH_X86], [1], [Define if on x86])
-        BIT=32
-        BIT_OPT=-m32
-        ;;
-    arm*)
-        AC_DEFINE([ARCH_ARM], [1], [Define if on ARM])
-        BIT=32
-        ;;
-    aarch64)
-        AC_DEFINE([ARCH_AARCH64], [1], [Define if on AArch64])
-        BIT=64
-        ;;
-esac
 
-MCL_SIZEOF_UNIT=`expr $BIT / 8`
-MCL_MAX_BIT_SIZE=384
 
 CXXFLAGS_WARN="-Wall -Wextra -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings -Wfloat-equal -Wpointer-arith -Wundef"
-MCL_CXXFLAGS="-DMCL_NO_AUTOLINK -DMCLBN_NO_AUTOLINK -DMCL_USE_LLVM=1 -DMCL_SIZEOF_UNIT=$MCL_SIZEOF_UNIT -DMCL_MAX_BIT_SIZE=$MCL_MAX_BIT_SIZE"
-CXXFLAGS="$CXXFLAGS $BIT_OPT $CXXFLAGS_WARN -I include -I src"
-LDFLAGS="$LDFLAGS $BIT_OPT"
+CXXFLAGS="$CXXFLAGS $CXXFLAGS_WARN -I include -I src"
 
 AC_SUBST(CXXFLAGS)
 AC_SUBST(LDFLAGS)
-AC_SUBST(BIT)
 AC_SUBST(CXX)
 AC_SUBST(CC)
-AC_SUBST(MCL_MAX_BIT_SIZE)
 
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_FILES([Makefile libmcl.pc])
+AC_CONFIG_FILES([Makefile libbls.pc])
 
 AC_OUTPUT
 
