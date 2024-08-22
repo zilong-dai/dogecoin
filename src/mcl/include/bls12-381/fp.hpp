@@ -49,7 +49,7 @@ public:
     bool isEven() const;
     bool isZero() const;
     bool isOne() const;
-    constexpr qstrong_ordering cmp(const fp& e) const {
+    qstrong_ordering cmp(const fp& e) const {
         for(int64_t i = 5; i >= 0; i--)
         {
             if(d[i] < e.d[i])
@@ -95,11 +95,11 @@ public:
     // However, there are still ambiguity there as the fp can be in Montgomery form or not.
     // Please avoid using those operators.
     // constexpr qstrong_ordering operator<=>(const fp& e) const { return cmp(e); }
-    constexpr bool operator>(const fp& e) const { return cmp(e) == qstrong_ordering::greater; }
-    constexpr bool operator>=(const fp& e) const { return cmp(e) != qstrong_ordering::less; }
-    constexpr bool operator<(const fp& e) const { return cmp(e) == qstrong_ordering::less; }
-    constexpr bool operator<=(const fp& e) const { return cmp(e) != qstrong_ordering::greater; }
-    constexpr bool operator!=(const fp& e) const { return cmp(e) != qstrong_ordering::equal; }
+    bool operator>(const fp& e) const { return cmp(e) == qstrong_ordering::greater; }
+    bool operator>=(const fp& e) const { return cmp(e) != qstrong_ordering::less; }
+    bool operator<(const fp& e) const { return cmp(e) == qstrong_ordering::less; }
+    bool operator<=(const fp& e) const { return cmp(e) != qstrong_ordering::greater; }
+    bool operator!=(const fp& e) const { return cmp(e) != qstrong_ordering::equal; }
 
     constexpr bool operator==(const fp& e) const { return cmp(e) == qstrong_ordering::equal; }
 
