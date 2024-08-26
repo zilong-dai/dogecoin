@@ -38,13 +38,11 @@ public:
     void toAffineBytesBE(const tcb::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
     void toAffineBytesLE(const tcb::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
     void toCompressedBytesBE(const tcb::span<uint8_t, 48> out) const;
-    void toCompressedMCLBytesLE(const tcb::span<uint8_t, 48> out) const;
     std::array<uint8_t, 144> toJacobianBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 144> toJacobianBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toAffineBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toAffineBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 48> toCompressedBytesBE() const;
-    std::array<uint8_t, 48> toCompressedMCLBytesLE() const;
     static g1 zero();
     static g1 one();
     bool isZero() const;
@@ -134,13 +132,11 @@ public:
     void toAffineBytesBE(const tcb::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
     void toAffineBytesLE(const tcb::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
     void toCompressedBytesBE(const tcb::span<uint8_t, 96> out) const;
-    void toCompressedMCLBytesLE(const tcb::span<uint8_t, 96> out) const;
     std::array<uint8_t, 288> toJacobianBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 288> toJacobianBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 192> toAffineBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 192> toAffineBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toCompressedBytesBE() const;
-    std::array<uint8_t, 96> toCompressedMCLBytesLE() const;
     static g2 zero();
     static g2 one();
     bool isZero() const;

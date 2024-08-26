@@ -227,19 +227,6 @@ void g1::toCompressedBytesBE(const tcb::span<uint8_t, 48> out) const
     out[0] |= 0x80;
 }
 
-void g1::toCompressedMCLBytesLE(const tcb::span<uint8_t, 48> out) const
-{
-    // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
-    g1 p = affine();
-    memcpy(out.data(), p.x.toBytesLE().data(), 48);
-    // checks if y component is odd
-    if((p.y.fromMont().d[0] & 1) == 1)
-    {
-        // set top bit of most significanty byte if y is odd
-        out[47] |= 0x80;
-    }
-}
-
 array<uint8_t, 144> g1::toJacobianBytesBE(const from_mont fm /* = from_mont::yes */) const
 {
     array<uint8_t, 144> out;
@@ -275,12 +262,6 @@ array<uint8_t, 48> g1::toCompressedBytesBE() const
     return out;
 }
 
-array<uint8_t, 48> g1::toCompressedMCLBytesLE() const
-{
-    array<uint8_t, 48> out;
-    toCompressedMCLBytesLE(out);
-    return out;
-}
 
 g1 g1::zero()
 {
@@ -526,7 +507,7 @@ g1 g1::weightedSum(tcb::span<const g1> points, tcb::span<const std::array<uint64
     uint64_t c = 3;
     if(effective_size >= 32)
     {
-        c = (std::numeric_limits<size_t>::digits - qcountl_zero(effective_size))/3 + 2;
+        c = (sizeof(size_t) * 8 - qcountl_zero(effective_size))/3 + 2;
     }
     uint64_t bucketSize = (1<<c)-1;
     uint64_t windowsSize = 255/c+1;
@@ -1003,21 +984,6 @@ void g2::toCompressedBytesBE(const tcb::span<uint8_t, 96> out) const
     out[0] |= 0x80;
 }
 
-void g2::toCompressedMCLBytesLE(const tcb::span<uint8_t, 96> out) const
-{
-    // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
-    g2 p = affine();
-    memcpy(out.data(), p.x.c0.toBytesLE().data(), 48);
-    memcpy(out.data() + 48, p.x.c1.toBytesLE().data(), 48);
-    
-    // check if p.y.c0 is odd
-    if((p.y.c0.fromMont().d[0] & 1) == 1)
-    {
-        // if odd, set the top bit of the last byte (most significant byte of p.x.c1)
-        out[95] |= 0x80;
-    }
-}
-
 array<uint8_t, 288> g2::toJacobianBytesBE(const from_mont fm /* = from_mont::yes */) const
 {
     array<uint8_t, 288> out;
@@ -1050,13 +1016,6 @@ array<uint8_t, 96> g2::toCompressedBytesBE() const
 {
     array<uint8_t, 96> out;
     toCompressedBytesBE(out);
-    return out;
-}
-
-array<uint8_t, 96> g2::toCompressedMCLBytesLE() const
-{
-    array<uint8_t, 96> out;
-    toCompressedMCLBytesLE(out);
     return out;
 }
 
@@ -1349,7 +1308,7 @@ g2 g2::weightedSum(tcb::span<const g2> points, tcb::span<const std::array<uint64
     uint64_t c = 3;
     if(effective_size >= 32)
     {
-        c = (std::numeric_limits<size_t>::digits - qcountl_zero(effective_size))/3 + 2;
+        c = (sizeof(size_t) * 8 - qcountl_zero(effective_size))/3 + 2;
     }
     uint64_t bucketSize = (1<<c)-1;
     uint64_t windowsSize = 255/c+1;

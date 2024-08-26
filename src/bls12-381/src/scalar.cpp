@@ -4,47 +4,6 @@ using namespace std;
 
 namespace bls12_381
 {
-
-vector<uint8_t> hexToBytes(std::string s)
-{
-    uint64_t start_idx = 0;
-    if(s[0] == '0' && s[1] == 'x')
-    {
-        start_idx = 2;
-    }
-
-    if(s.length() % 2 != 0)
-    {
-        // string length invalid!
-        return {};
-    }
-
-    vector<uint8_t> bytes;
-    uint64_t num_bytes = (s.length() - start_idx) / 2;
-    bytes.reserve(num_bytes);
-    for(size_t i = 0, j = start_idx; i < num_bytes; i++, j += 2)
-    {
-        bytes.push_back((s[j] % 32 + 9) % 25 * 16 + (s[j+1] % 32 + 9) % 25);
-    }
-
-    return bytes;
-}
-
-string bytesToHex(tcb::span<const uint8_t> in)
-{
-    constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-    string s(2 + in.size() * 2, ' ');
-    s[0] = '0';
-    s[1] = 'x';
-    for(uint64_t i = 0; i < in.size(); ++i)
-    {
-        s[2 + 2*i]     = hexmap[(in[i] & 0xF0) >> 4];
-        s[2 + 2*i+1]   = hexmap[ in[i] & 0x0F      ];
-    }
-    return s;
-}
-
-
 // HELPER FUNCTIONS
 // for p mod q calculations
 #define RLC_MASK(B) ((-(uint64_t)((B) >= 64)) | (((uint64_t)1 << ((B) % 64)) - 1))

@@ -99,7 +99,7 @@ fp12 miller_loop(tcb::span<const std::tuple<g1, g2>> pairs, std::function<void()
     ellCoeffs.resize(pairs.size());
     for(uint64_t i = 0; i < pairs.size(); i++)
     {
-        pre_compute(ellCoeffs[i], get<g2>(pairs[i]));
+        pre_compute(ellCoeffs[i], get<1>(pairs[i]));
     }
     if(pairs.size() >= 20 && yield)
     {
@@ -116,8 +116,8 @@ fp12 miller_loop(tcb::span<const std::tuple<g1, g2>> pairs, std::function<void()
         }
         for(uint64_t j = 0; j <= pairs.size()-1; j++)
         {
-            t[0] = ellCoeffs[j][k][2].mulByFq(get<g1>(pairs[j]).y);
-            t[1] = ellCoeffs[j][k][1].mulByFq(get<g1>(pairs[j]).x);
+            t[0] = ellCoeffs[j][k][2].mulByFq(get<0>(pairs[j]).y);
+            t[1] = ellCoeffs[j][k][1].mulByFq(get<0>(pairs[j]).x);
             f.mulBy014Assign(ellCoeffs[j][k][0], t[1], t[0]);
         }
         if(((g2::cofactorEFF[0] >> i) & 1) == 1)
@@ -125,8 +125,8 @@ fp12 miller_loop(tcb::span<const std::tuple<g1, g2>> pairs, std::function<void()
             k++;
             for(uint64_t j = 0; j <= pairs.size()-1; j++)
             {
-                t[0] = ellCoeffs[j][k][2].mulByFq(get<g1>(pairs[j]).y);
-                t[1] = ellCoeffs[j][k][1].mulByFq(get<g1>(pairs[j]).x);
+                t[0] = ellCoeffs[j][k][2].mulByFq(get<0>(pairs[j]).y);
+                t[1] = ellCoeffs[j][k][1].mulByFq(get<0>(pairs[j]).x);
                 f.mulBy014Assign(ellCoeffs[j][k][0], t[1], t[0]);
             }
         }

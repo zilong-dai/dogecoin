@@ -1490,25 +1490,25 @@ static bool cpu_has_bmi2_and_adx() {
     return false;
 }
 
-#ifdef __ELF__
-extern "C" char** _dl_argv;
+// #ifdef __ELF__
+// extern "C" char** _dl_argv;
 
-extern "C" blsmul_func_t __attribute__((no_sanitize_address)) resolve_blsmul() {
-    int argc = *(int*)(_dl_argv - 1);
-    char** my_environ = (char**)(_dl_argv + argc + 1);
-    while(*my_environ != nullptr) {
-       const char disable_str[] = "BLS_DISABLE_BMI2";
-        if(strncmp(*my_environ++, disable_str, strlen(disable_str)) == 0)
-           return __multiply;
-    }
+// extern "C" blsmul_func_t __attribute__((no_sanitize_address)) resolve_blsmul() {
+//     int argc = *(int*)(_dl_argv - 1);
+//     char** my_environ = (char**)(_dl_argv + argc + 1);
+//     while(*my_environ != nullptr) {
+//        const char disable_str[] = "BLS_DISABLE_BMI2";
+//         if(strncmp(*my_environ++, disable_str, strlen(disable_str)) == 0)
+//            return __multiply;
+//     }
 
-    if(cpu_has_bmi2_and_adx())
-       return __mul_ex;
-    return __multiply;
-}
+//     if(cpu_has_bmi2_and_adx())
+//        return __mul_ex;
+//     return __multiply;
+// }
 
-void _multiply(fp*, const fp*, const fp*) __attribute__((ifunc("resolve_blsmul")));
-#else
+// void _multiply(fp*, const fp*, const fp*) __attribute__((ifunc("resolve_blsmul")));
+// #else
 blsmul_func_t _multiply = __multiply;
 
 struct bls_mul_init {
@@ -1519,7 +1519,7 @@ struct bls_mul_init {
 };
 static bls_mul_init the_bls_mul_init;
 
-#endif //__ELF__
+// #endif //__ELF__
 #else
 void _multiply(fp* z, const fp* x, const fp* y)
 {
