@@ -264,7 +264,7 @@ void bn_divn_low(uint64_t *c, uint64_t *d, uint64_t *a, int sa, uint64_t *b, int
             uint64_t hi =  a[i] / b[t];
             uint64_t uint64_max = std::numeric_limits<uint64_t>::max();
             uint64_t lo_quotient = uint64_max / b[t];
-            uint64_t lo_remainder = uint64_t_max - (b[t] * lo_quotient) + 1;
+            uint64_t lo_remainder = uint64_max - (b[t] * lo_quotient) + 1;
 
             uint64_t hi_quotient = a[i] / b[t];
             uint64_t hi_remainder = a[i] - (b[t] * hi_quotient);
