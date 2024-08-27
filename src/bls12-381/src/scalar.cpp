@@ -109,7 +109,7 @@ uint64_t bn_mul1_low(uint64_t *c, const uint64_t *a, uint64_t digit, int size)
         r1 = (static_cast<__uint128_t>(*a) * static_cast<__uint128_t>(digit)) >> (64);
         #else
         uint64_t rlow = 0;;
-        tie(r1, rlow) = Mul64(*a, digit, 0);
+        tie(r1, rlow) = Mul64(*a, digit);
         #endif
         r0 = (*a) * (digit);
         *c = r0 + carry;
