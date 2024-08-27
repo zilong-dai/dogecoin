@@ -1,8 +1,11 @@
 #include <cstdint>
 #include <tuple>
 
+#if defined(UINT128_MAX) || defined(__SIZEOF_INT128__)
+#define USE_INT128
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
+#endif
 
 namespace bls12_381
 {

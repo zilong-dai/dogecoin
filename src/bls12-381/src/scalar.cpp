@@ -105,7 +105,12 @@ uint64_t bn_mul1_low(uint64_t *c, const uint64_t *a, uint64_t digit, int size)
     uint64_t r0, r1, carry = 0;
     for(int i = 0; i < size; i++, a++, c++)
     {
+        #if defined(USE_INT128)
         r1 = (static_cast<__uint128_t>(*a) * static_cast<__uint128_t>(digit)) >> (64);
+        #else
+        uint64_t rlow = 0;;
+        tie(r1, rlow) = Mul64(*a, digit, 0);
+        #endif
         r0 = (*a) * (digit);
         *c = r0 + carry;
         carry = r1 + (*c < carry);
@@ -252,7 +257,20 @@ void bn_divn_low(uint64_t *c, uint64_t *d, uint64_t *a, int sa, uint64_t *b, int
         }
         else
         {
+            #if defined(USE_INT128)
             c[i - t - 1] = (((__uint128_t)(a[i]) << (64)) | (a[i - 1])) / (b[t]);
+            #else
+            uint64_t lo =  a[i - 1] / b[t];
+            uint64_t hi =  a[i] / b[t];
+            uint64_t uint64_max = std::numeric_limits<uint64_t>::max();
+            uint64_t lo_quotient = uint64_max / b[t];
+            uint64_t lo_remainder = uint64_t_max - (b[t] * lo_quotient) + 1;
+
+            uint64_t hi_quotient = a[i] / b[t];
+            uint64_t hi_remainder = a[i] - (b[t] * hi_quotient);
+
+            c[i - t - 1] = hi_quotient * lo_quotient * b[t] + lo_quotient * hi_remainder + lo_remainder * hi_quotient + hi_remainder * lo_remainder / b[t] + a[i - 1] / b[t];
+            #endif
         }
 
         c[i - t - 1]++;
