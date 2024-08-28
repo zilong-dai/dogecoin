@@ -257,7 +257,7 @@ void bn_divn_low(uint64_t *c, uint64_t *d, uint64_t *a, int sa, uint64_t *b, int
         }
         else
         {
-            #if defined(USE_INT164)
+            #if defined(USE_INT128)
             c[i - t - 1] = (((__uint128_t)(a[i]) << (64)) | (a[i - 1])) / (b[t]);
             #else
             uint64_t a1 = a[i];
