@@ -23,43 +23,6 @@ namespace bls12_381_groth16
             return true;
         }
     }
-    bool deserializeG2FromVector(bls12_381::g2 *out, const std::vector<unsigned char> *v, size_t startIndex)
-    {
-        if (v->size() < (96 + startIndex))
-        {
-            return false;
-        }
-        std::array<unsigned char, 96> s1;
-        std::copy(v->begin() + startIndex, v->begin() + startIndex + 96, s1.begin());
-        auto g2Option = g2::fromCompressedMCLBytesLE(s1);
-        if (!g2Option.has_value())
-        {
-            return false;
-        }
-        else
-        {
-            *out = g2Option.value();
-            return true;
-        }
-    }
-    bool deserializeFpFromVector(bls12_381::fp *out, const std::vector<unsigned char> *v, size_t startIndex)
-    {
-        if (v->size() < (48 + startIndex))
-        {
-            return false;
-        }
-        tcb::span<const unsigned char, 48> s(v->data() + startIndex, 48);
-        auto fpOption = fp::fromBytesLE(s);
-        if (!fpOption.has_value())
-        {
-            return false;
-        }
-        else
-        {
-            *out = fpOption.value();
-            return true;
-        }
-    }
     bool deserializeScalarFromVector(std::array<uint64_t, 4> &out, const std::vector<unsigned char> *v, size_t startIndex)
     {
         if (v->size() < (32 + startIndex))
@@ -216,11 +179,6 @@ namespace bls12_381_groth16
         precomputed->gammaNeg = vk->gamma.negate();
         return 1;
     }
-    fp12 computeMillerLoopSingle(g1 a, g2 b) {
-        std::vector<std::tuple<g1, g2>> v;
-        pairing::add_pair(v, a, b);
-        return pairing::miller_loop(v, std::function<void()>());
-    }
     int verifyProofWith2PublicInputs(
         const Groth16ProofWith2PublicInputs *proof,
         const Groth16VerifierKeyInput *vk,
@@ -242,20 +200,7 @@ namespace bls12_381_groth16
         pairing::add_pair(v, proof->pi_1, proof->pi_2);
         pairing::add_pair(v, sumKTimesPub, precomputed->gammaNeg);
         pairing::add_pair(v, proof->pi_3, precomputed->deltaNeg);
-/*
-        // compute e([π₁]₁, [π₂]₂)
-        fp12 ePi1Pi2 = computeMillerLoopSingle(proof->pi_1, proof->pi_2);
 
-        // compute e( [Σᵥ (Kᵥ₊₁ * publicInputs[v])]₁, -[γ]₂ )
-        fp12 eSumKTimesPubGammaNeg = computeMillerLoopSingle(sumKTimesPub, precomputed->gammaNeg);
-
-        // compute e([π₃]₁, -[δ]₂)
-        fp12 ePi3DeltaNeg = computeMillerLoopSingle(proof->pi_3, precomputed->deltaNeg);
-
-        // compute z = e(α, β) * e( [Σᵥ (Kᵥ₊₁ * publicInputs[v])]₁, -[γ]₂ ) * e([π₃]1, -[δ]₂)
-        fp12 z = ePi1Pi2.multiply(eSumKTimesPubGammaNeg).multiply(ePi3DeltaNeg);
-
-        */
         fp12 z = pairing::miller_loop(v, std::function<void()>());
         pairing::final_exponentiation(z);
         if(z.equal(precomputed->eAlphaBeta)){
@@ -264,5 +209,5 @@ namespace bls12_381_groth16
             return 0;
         }
     }
-    
+
 }

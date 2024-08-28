@@ -364,44 +364,4 @@ g2 g2::scale(const std::array<uint64_t, N>& s) const
     return q;
 }
 
-template<size_t N>
-std::string bytesToHex(const tcb::span<const uint8_t, N>& in)
-{
-    char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-    std::string s(2 + N * 2, ' ');
-    s[0] = '0';
-    s[1] = 'x';
-    for(uint64_t i = 0; i < N; i++)
-    {
-        s[2 + 2*i]     = hexmap[(in[i] & 0xF0) >> 4];
-        s[2 + 2*i+1]   = hexmap[ in[i] & 0x0F      ];
-    }
-    return s;
-}
-std::string bytesToHex(tcb::span<const uint8_t> in);
-
-template<size_t N>
-void hexToBytes(const std::string& s, tcb::span<uint8_t, N> out)
-{
-    // No checks on the string length in the compile time version!
-    uint64_t start_idx = 0;
-    if(s[0] == '0' && s[1] == 'x')
-    {
-        start_idx = 2;
-    }
-
-    for(size_t i = 0, j = start_idx; i < N; i++, j += 2)
-    {
-        out[i] = (s[j] % 32 + 9) % 25 * 16 + (s[j+1] % 32 + 9) % 25;
-    }
-}
-template<size_t N>
-std::array<uint8_t, N> hexToBytes(const std::string& s)
-{
-    std::array<uint8_t, N> out;
-    hexToBytes<N>(s, out);
-    return out;
-}
-std::vector<uint8_t> hexToBytes(std::string &s);
-
 } // namespace bls12_381

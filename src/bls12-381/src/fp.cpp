@@ -341,12 +341,12 @@ bool fp::isQuadraticNonResidue() const
 bool fp::isLexicographicallyLargest() const
 {
     array<uint64_t, 6> halfQ = {
-        0x0D00'88F5'1CBF'F34D,
-        0x258D'D3DB'21A5'D66B,
-        0xB23B'A5C2'79C2'895F,
-        0xB398'6950'7B58'7B12,
-        0x0F55'FFFF'58A9'FFFF,
-        0xDCFF'7FFF'FFFF'D556
+        0x0D0088F51CBFF34D,
+        0x258DD3DB21A5D66B,
+        0xB23BA5C279C2895F,
+        0xB39869507B587B12,
+        0x0F55FFFF58A9FFFF,
+        0xDCFF7FFFFFFFD556
     };
     array<uint64_t, 6> yValue = fromMont().d;
     
@@ -364,93 +364,93 @@ bool fp::isLexicographicallyLargest() const
 
 const fp fp::MODULUS = fp(
 {
-    0xb9fe'ffff'ffff'aaab,
-    0x1eab'fffe'b153'ffff,
-    0x6730'd2a0'f6b0'f624,
-    0x6477'4b84'f385'12bf,
-    0x4b1b'a7b6'434b'acd7,
-    0x1a01'11ea'397f'e69a,
+    0xb9feffffffffaaab,
+    0x1eabfffeb153ffff,
+    0x6730d2a0f6b0f624,
+    0x64774b84f38512bf,
+    0x4b1ba7b6434bacd7,
+    0x1a0111ea397fe69a,
 });
 
-const uint64_t fp::INP = 0x89f3'fffc'fffc'fffd;
+const uint64_t fp::INP = 0x89f3fffcfffcfffd;
 
 const fp fp::R1 = fp({
-    0x7609'0000'0002'fffd,
-    0xebf4'000b'c40c'0002,
-    0x5f48'9857'53c7'58ba,
-    0x77ce'5853'7052'5745,
-    0x5c07'1a97'a256'ec6d,
-    0x15f6'5ec3'fa80'e493,
+    0x760900000002fffd,
+    0xebf4000bc40c0002,
+    0x5f48985753c758ba,
+    0x77ce585370525745,
+    0x5c071a97a256ec6d,
+    0x15f65ec3fa80e493,
 });
 
 const fp fp::R2 = fp({
-    0xf4df'1f34'1c34'1746,
-    0x0a76'e6a6'09d1'04f1,
-    0x8de5'476c'4c95'b6d5,
-    0x67eb'88a9'939d'83c0,
-    0x9a79'3e85'b519'952d,
-    0x1198'8fe5'92ca'e3aa,
+    0xf4df1f341c341746,
+    0x0a76e6a609d104f1,
+    0x8de5476c4c95b6d5,
+    0x67eb88a9939d83c0,
+    0x9a793e85b519952d,
+    0x11988fe592cae3aa,
 });
 
 const fp fp::B = fp({
-    0xaa27'0000'000c'fff3,
-    0x53cc'0032'fc34'000a,
-    0x478f'e97a'6b0a'807f,
-    0xb1d3'7ebe'e6ba'24d7,
-    0x8ec9'733b'bf78'ab2f,
-    0x09d6'4551'3d83'de7e,
+    0xaa270000000cfff3,
+    0x53cc0032fc34000a,
+    0x478fe97a6b0a807f,
+    0xb1d37ebee6ba24d7,
+    0x8ec9733bbf78ab2f,
+    0x09d645513d83de7e,
 });
 
 const fp fp::twoInv = fp({
-    0x1804'0000'0001'5554,
-    0x8550'0005'3ab0'0001,
-    0x633c'b57c'253c'276f,
-    0x6e22'd1ec'31eb'b502,
-    0xd391'6126'f2d1'4ca2,
-    0x17fb'b857'1a00'6596
+    0x1804000000015554,
+    0x855000053ab00001,
+    0x633cb57c253c276f,
+    0x6e22d1ec31ebb502,
+    0xd3916126f2d14ca2,
+    0x17fbb8571a006596
 });
 
 const fp fp::glvPhi1 = fp({
-    0xcd03'c9e4'8671'f071,
-    0x5dab'2246'1fcd'a5d2,
-    0x5870'42af'd385'1b95,
-    0x8eb6'0ebe'01ba'cb9e,
-    0x03f9'7d6e'83d0'50d2,
-    0x18f0'2065'5463'8741
+    0xcd03c9e48671f071,
+    0x5dab22461fcda5d2,
+    0x587042afd3851b95,
+    0x8eb60ebe01bacb9e,
+    0x03f97d6e83d050d2,
+    0x18f0206554638741
 });
 
 const array<uint64_t, 4> fp::Q = {
-    0xffff'ffff'0000'0001,
-    0x53bd'a402'fffe'5bfe,
-    0x3339'd808'09a1'd805,
-    0x73ed'a753'299d'7d48
+    0xffffffff00000001,
+    0x53bda402fffe5bfe,
+    0x3339d80809a1d805,
+    0x73eda753299d7d48
 };
 
 const array<uint64_t, 6> fp::pPlus1Over4 = {
-    0xee7f'bfff'ffff'eaab,
-    0x07aa'ffff'ac54'ffff,
-    0xd9cc'34a8'3dac'3d89,
-    0xd91d'd2e1'3ce1'44af,
-    0x92c6'e9ed'90d2'eb35,
-    0x0680'447a'8e5f'f9a6
+    0xee7fbfffffffeaab,
+    0x07aaffffac54ffff,
+    0xd9cc34a83dac3d89,
+    0xd91dd2e13ce144af,
+    0x92c6e9ed90d2eb35,
+    0x0680447a8e5ff9a6
 };
 
 const array<uint64_t, 6> fp::pMinus1Over2 = {
-    0xdcff'7fff'ffff'd555,
-    0x0f55'ffff'58a9'ffff,
-    0xb398'6950'7b58'7b12,
-    0xb23b'a5c2'79c2'895f,
-    0x258d'd3db'21a5'd66b,
-    0x0d00'88f5'1cbf'f34d
+    0xdcff7fffffffd555,
+    0x0f55ffff58a9ffff,
+    0xb39869507b587b12,
+    0xb23ba5c279c2895f,
+    0x258dd3db21a5d66b,
+    0x0d0088f51cbff34d
 };
 
 const array<uint64_t, 6> fp::pMinus3Over4 = {
-    0xee7f'bfff'ffff'eaaa,
-    0x07aa'ffff'ac54'ffff,
-    0xd9cc'34a8'3dac'3d89,
-    0xd91d'd2e1'3ce1'44af,
-    0x92c6'e9ed'90d2'eb35,
-    0x0680'447a'8e5f'f9a6
+    0xee7fbfffffffeaaa,
+    0x07aaffffac54ffff,
+    0xd9cc34a83dac3d89,
+    0xd91dd2e13ce144af,
+    0x92c6e9ed90d2eb35,
+    0x0680447a8e5ff9a6
 };
 
 fp2::fp2() : c0(fp()), c1(fp())
@@ -739,77 +739,77 @@ bool fp2::isLexicographicallyLargest() const
 
 const fp2 fp2::negativeOne2 = fp2({
     fp({
-        0x43f5'ffff'fffc'aaae,
-        0x32b7'fff2'ed47'fffd,
-        0x07e8'3a49'a2e9'9d69,
-        0xeca8'f331'8332'bb7a,
-        0xef14'8d1e'a0f4'c069,
-        0x040a'b326'3eff'0206
+        0x43f5fffffffcaaae,
+        0x32b7fff2ed47fffd,
+        0x07e83a49a2e99d69,
+        0xeca8f3318332bb7a,
+        0xef148d1ea0f4c069,
+        0x040ab3263eff0206
     }),
     fp({
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000
     }),
 });
 
 const fp2 fp2::B = fp2({
     fp({
-        0xaa27'0000'000c'fff3,
-        0x53cc'0032'fc34'000a,
-        0x478f'e97a'6b0a'807f,
-        0xb1d3'7ebe'e6ba'24d7,
-        0x8ec9'733b'bf78'ab2f,
-        0x09d6'4551'3d83'de7e,
+        0xaa270000000cfff3,
+        0x53cc0032fc34000a,
+        0x478fe97a6b0a807f,
+        0xb1d37ebee6ba24d7,
+        0x8ec9733bbf78ab2f,
+        0x09d645513d83de7e,
     }),
     fp({
-        0xaa27'0000'000c'fff3,
-        0x53cc'0032'fc34'000a,
-        0x478f'e97a'6b0a'807f,
-        0xb1d3'7ebe'e6ba'24d7,
-        0x8ec9'733b'bf78'ab2f,
-        0x09d6'4551'3d83'de7e,
+        0xaa270000000cfff3,
+        0x53cc0032fc34000a,
+        0x478fe97a6b0a807f,
+        0xb1d37ebee6ba24d7,
+        0x8ec9733bbf78ab2f,
+        0x09d645513d83de7e,
     }),
 });
 
 const fp2 fp2::psiX = fp2({
     fp({
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
-        0x0000'0000'0000'0000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
     }),
     fp({
-        0x890d'c9e4'8675'45c3,
-        0x2af3'2253'3285'a5d5,
-        0x5088'0866'309b'7e2c,
-        0xa20d'1b8c'7e88'1024,
-        0x14e4'f04f'e2db'9068,
-        0x14e5'6d3f'1564'853a,
+        0x890dc9e4867545c3,
+        0x2af322533285a5d5,
+        0x50880866309b7e2c,
+        0xa20d1b8c7e881024,
+        0x14e4f04fe2db9068,
+        0x14e56d3f1564853a,
     }),
 });
 
 const fp2 fp2::psiY = fp2({
     fp({
-        0x3e2f'585d'a55c'9ad1,
-        0x4294'213d'86c1'8183,
-        0x3828'44c8'8b62'3732,
-        0x92ad'2afd'1910'3e18,
-        0x1d79'4e4f'ac7c'f0b9,
-        0x0bd5'92fc'7d82'5ec8,
+        0x3e2f585da55c9ad1,
+        0x4294213d86c18183,
+        0x382844c88b623732,
+        0x92ad2afd19103e18,
+        0x1d794e4fac7cf0b9,
+        0x0bd592fc7d825ec8,
     }),
     fp({
-        0x7bcf'a7a2'5aa3'0fda,
-        0xdc17'dec1'2a92'7e7c,
-        0x2f08'8dd8'6b4e'bef1,
-        0xd1ca'2087'da74'd4a7,
-        0x2da2'5966'96ce'bc1d,
-        0x0e2b'7eed'bbfd'87d2,
+        0x7bcfa7a25aa30fda,
+        0xdc17dec12a927e7c,
+        0x2f088dd86b4ebef1,
+        0xd1ca2087da74d4a7,
+        0x2da2596696cebc1d,
+        0x0e2b7eedbbfd87d2,
     }),
 });
 

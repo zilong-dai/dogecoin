@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I build-aux/m4
 
-AM_CXXFLAGS = -std=c++17 -fpic -O2
-AM_CPPFLAGS = -std=c++17 -fpic -O2
+AM_CXXFLAGS = -std=c++11 -fpic -O2
+AM_CPPFLAGS = -std=c++11 -fpic -O2
 
 AM_CFLAGS = --fpic -O2
 

@@ -1,8 +1,11 @@
 #include <cstdint>
 #include <tuple>
 
+#if defined(UINT128_MAX) || defined(__SIZEOF_INT128__)
+#define USE_INT128
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
+#endif
 
 namespace bls12_381
 {
@@ -27,9 +30,7 @@ void _lsubtract(fp* z, const fp* x, const fp* y);
 // The "smaller than 4p" here means the montgomery form itself as number is less than 4p.
 // Therefore, at most ONE _ladd/_lsubstract/_ldouble is allowed before passing the result to _multiply,
 // unless the algorithm makes sure the number is small.
-#if defined(__x86_64__) && defined(__ELF__)
-extern void _multiply(fp*, const fp*, const fp*);
-#elif defined(__x86_64__)
+#if defined(__x86_64__)
 extern void (*_multiply)(fp*, const fp*, const fp*);
 #else
 void _multiply(fp*, const fp*, const fp*);

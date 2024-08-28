@@ -4,47 +4,6 @@ using namespace std;
 
 namespace bls12_381
 {
-
-vector<uint8_t> hexToBytes(std::string s)
-{
-    uint64_t start_idx = 0;
-    if(s[0] == '0' && s[1] == 'x')
-    {
-        start_idx = 2;
-    }
-
-    if(s.length() % 2 != 0)
-    {
-        // string length invalid!
-        return {};
-    }
-
-    vector<uint8_t> bytes;
-    uint64_t num_bytes = (s.length() - start_idx) / 2;
-    bytes.reserve(num_bytes);
-    for(size_t i = 0, j = start_idx; i < num_bytes; i++, j += 2)
-    {
-        bytes.push_back((s[j] % 32 + 9) % 25 * 16 + (s[j+1] % 32 + 9) % 25);
-    }
-
-    return bytes;
-}
-
-string bytesToHex(tcb::span<const uint8_t> in)
-{
-    constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-    string s(2 + in.size() * 2, ' ');
-    s[0] = '0';
-    s[1] = 'x';
-    for(uint64_t i = 0; i < in.size(); ++i)
-    {
-        s[2 + 2*i]     = hexmap[(in[i] & 0xF0) >> 4];
-        s[2 + 2*i+1]   = hexmap[ in[i] & 0x0F      ];
-    }
-    return s;
-}
-
-
 // HELPER FUNCTIONS
 // for p mod q calculations
 #define RLC_MASK(B) ((-(uint64_t)((B) >= 64)) | (((uint64_t)1 << ((B) % 64)) - 1))
@@ -146,7 +105,12 @@ uint64_t bn_mul1_low(uint64_t *c, const uint64_t *a, uint64_t digit, int size)
     uint64_t r0, r1, carry = 0;
     for(int i = 0; i < size; i++, a++, c++)
     {
+        #if defined(USE_INT128)
         r1 = (static_cast<__uint128_t>(*a) * static_cast<__uint128_t>(digit)) >> (64);
+        #else
+        uint64_t rlow = 0;;
+        tie(r1, rlow) = Mul64(*a, digit);
+        #endif
         r0 = (*a) * (digit);
         *c = r0 + carry;
         carry = r1 + (*c < carry);
@@ -293,7 +257,36 @@ void bn_divn_low(uint64_t *c, uint64_t *d, uint64_t *a, int sa, uint64_t *b, int
         }
         else
         {
+            #if defined(USE_INT164)
             c[i - t - 1] = (((__uint128_t)(a[i]) << (64)) | (a[i - 1])) / (b[t]);
+            #else
+            uint64_t a1 = a[i];
+            uint64_t a0 = a[i - 1];
+            uint64_t bt = b[t];
+            uint64_t res_q = 0;
+            uint64_t uint64_max = UINT64_MAX;
+            uint64_t u64_quotient = uint64_max / bt;
+            uint64_t u64_remainder = uint64_max % bt + 1;
+
+            while (a1 != 0 || a0 > bt)
+            {
+                uint64_t a1_quotient = a1 / bt;
+                uint64_t a1_remainder = a1 % bt;
+                uint64_t a0_quotient = a0 / bt;
+                uint64_t a0_remainder = a0 % bt;
+
+                // (a1_quotient * b + a1_remainder) *  (u64_quotient * b + u64_remainder) = (a1_quotient * b * u64_quotient + a1_remainder * u64_quotient + a1_quotient * u64_remainder) * b + (a1_remainder * u64_remainder)
+                res_q += (a1_quotient * bt * u64_quotient + a1_remainder * u64_quotient + a1_quotient * u64_remainder) + a0_quotient;
+                tie(a1, a0) = Mul64(a1_remainder, u64_remainder);
+                a0 += a0_remainder;
+                if (a0 < a0_remainder)
+                {
+                    a1++;
+                }
+            }
+            c[i - t - 1] = res_q;
+
+            #endif
         }
 
         c[i - t - 1]++;
