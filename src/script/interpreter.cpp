@@ -1043,8 +1043,8 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
                     }
 
-                    // Only modes 0 and 1 are implemented; others return an error
-                    if(mode.getint() != 1 && mode.getint() != 0){
+                    // Only modes 1 is implemented; Mode 0 is deprecated; others return an error
+                    if(mode.getint() != 1){
                         // TODO: Implement mode 2 and 3
                         return set_error(serror, SCRIPT_ERR_SIG_DER);
                     }
@@ -1056,12 +1056,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     valtype& verfierDataB = stacktop(-6);
                     valtype& verfierDataA = stacktop(-7);
 
-                    /* TODO: drop the proof?
-                    // Drop the signature in pre-segwit scripts but not segwit scripts
-                    if (sigversion == SIGVERSION_BASE) {
-                        scriptCode.FindAndDelete(CScript(vchSig));
-                    }
-                    */
                     valtype publicInput1(32); // Initialize a 32-byte array for tx_hash
                     if(mode.getint()==1){
                         CScript scriptCode(pbegincodehash, pend);
