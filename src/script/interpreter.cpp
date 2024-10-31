@@ -255,6 +255,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
     static const valtype vchFalse(0);
     static const valtype vchZero(0);
     static const valtype vchTrue(1, 1);
+    bool zkpOpIsUsed = false;
 
     CScript::const_iterator pc = script.begin();
     CScript::const_iterator pend = script.end();
@@ -1027,6 +1028,14 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                 break;
                 case OP_CHECKZKPVERIFY:
                 {
+                    if (zkpOpIsUsed)
+                    {
+                        return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
+                    }else
+                    {
+                        zkpOpIsUsed = true;
+                    }
+                    
                     // Ensure stack has enough elements for the groth16 proof verification
                     if (stack.size() < 12)
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
