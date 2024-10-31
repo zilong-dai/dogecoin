@@ -1025,7 +1025,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     }
                 }
                 break;
-                case OP_CHECKGROTH16VERIFY:
+                case OP_CHECKZKPVERIFY:
                 {
                     // Ensure stack has enough elements for the groth16 proof verification
                     if (stack.size() < 12)
