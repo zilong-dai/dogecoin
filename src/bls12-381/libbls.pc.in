@@ -3,7 +3,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libmcl
+Name: libbls
 Description: Pairing Library
 URL: https://github.com/QEDProtocol/bls12-381
 Version: @PACKAGE_VERSION@

@@ -30,7 +30,7 @@ void _lsubtract(fp* z, const fp* x, const fp* y);
 // The "smaller than 4p" here means the montgomery form itself as number is less than 4p.
 // Therefore, at most ONE _ladd/_lsubstract/_ldouble is allowed before passing the result to _multiply,
 // unless the algorithm makes sure the number is small.
-#if defined(__x86_64__)
+#if defined(__x86_64_asm__)
 extern void (*_multiply)(fp*, const fp*, const fp*);
 #else
 void _multiply(fp*, const fp*, const fp*);
@@ -41,7 +41,7 @@ void _multiply(fp*, const fp*, const fp*);
 // The carryOut output is guaranteed to be 0 or 1.
 //
 // This function's execution time does not depend on the inputs.
-std::tuple<uint64_t, uint64_t> Add64(
+inline std::tuple<uint64_t, uint64_t> Add64(
     const uint64_t& x,
     const uint64_t& y,
     const uint64_t& carry
@@ -63,12 +63,12 @@ std::tuple<uint64_t, uint64_t> Sub64(
 // half returned in lo.
 //
 // This function's execution time does not depend on the inputs.
-std::tuple<uint64_t, uint64_t> Mul64(
+inline std::tuple<uint64_t, uint64_t> Mul64(
     const uint64_t& x,
     const uint64_t& y
 );
 
-std::tuple<uint64_t, uint64_t, uint64_t> madd(
+inline std::tuple<uint64_t, uint64_t, uint64_t> madd(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& t,
@@ -77,21 +77,21 @@ std::tuple<uint64_t, uint64_t, uint64_t> madd(
 );
 
 // madd0 hi = a*b + c (discards lo bits)
-uint64_t madd0(
+inline uint64_t madd0(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& c
 );
 
 // madd1 hi, lo = a*b + c
-std::tuple<uint64_t, uint64_t> madd1(
+inline std::tuple<uint64_t, uint64_t> madd1(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& c
 );
 
 // madd2 hi, lo = a*b + c + d
-std::tuple<uint64_t, uint64_t> madd2(
+inline std::tuple<uint64_t, uint64_t> madd2(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& c,
@@ -99,7 +99,7 @@ std::tuple<uint64_t, uint64_t> madd2(
 );
 
 // madd2s superhi, hi, lo = 2*a*b + c + d + e
-std::tuple<uint64_t, uint64_t, uint64_t> madd2s(
+inline std::tuple<uint64_t, uint64_t, uint64_t> madd2s(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& c,
@@ -107,27 +107,27 @@ std::tuple<uint64_t, uint64_t, uint64_t> madd2s(
     const uint64_t& e
 );
 
-std::tuple<uint64_t, uint64_t, uint64_t> madd1s(
+inline std::tuple<uint64_t, uint64_t, uint64_t> madd1s(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& d,
     const uint64_t& e
 );
 
-std::tuple<uint64_t, uint64_t, uint64_t> madd2sb(
+inline std::tuple<uint64_t, uint64_t, uint64_t> madd2sb(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& c,
     const uint64_t& e
 );
 
-std::tuple<uint64_t, uint64_t, uint64_t> madd1sb(
+inline std::tuple<uint64_t, uint64_t, uint64_t> madd1sb(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& e
 );
 
-std::tuple<uint64_t, uint64_t> madd3(
+inline std::tuple<uint64_t, uint64_t> madd3(
     const uint64_t& a,
     const uint64_t& b,
     const uint64_t& c,

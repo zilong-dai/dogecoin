@@ -13,55 +13,48 @@ AC_INIT([libbls], m4_join([.], _PKG_VERSION_MAJOR, _PKG_VERSION_MINOR, _PKG_VERS
 AC_SUBST(LIB_VERSION_CURRENT, _LIB_VERSION_CURRENT)
 AC_SUBST(LIB_VERSION_REVISION, _LIB_VERSION_REVISION)
 AC_SUBST(LIB_VERSION_AGE, _LIB_VERSION_AGE)
-AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIR([build-aux/m4])
-AC_CANONICAL_HOST
-AH_TOP([#ifndef LIBMCL_CONFIG_H])
-AH_TOP([#define LIBMCL_CONFIG_H])
-AH_BOTTOM([#endif /*LIBMCL_CONFIG_H*/])
 
 AM_INIT_AUTOMAKE([1.11.2 foreign subdir-objects])
 
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AC_ARG_ENABLE([blsasm], [AS_HELP_STRING([--enable-blsasm=yes|no], [Enable blsasm option])], [], [enable_blsasm=no])
 
 AC_PROG_CXX
-AC_PROG_CC
 AM_PROG_AR
 
 LT_INIT([win32-dll])
 
+
+CXXFLAGS="-O3 -I include"
+
 AC_CANONICAL_HOST
-case "$host_os" in
-    *mingw64*)
-        CXXFLAGS="$CXXFLAGS -D__USE_MINGW_ANSI_STDIO=1"
-        ;;
-    *cygwin*)
-        ;;
-    *darwin*)
-        AC_DEFINE([DARWIN], [1], [Define if on Darwin/Mac OS X])
-        ;;
-    *openbsd*)
-        CXXFLAGS="$CXXFLAGS -I/usr/local/include"
-        LDFLAGS="$LDFLAGS -L/usr/local/lib"
-        ;;
-    *freebsd*)
-        CXXFLAGS="$CXXFLAGS -I/usr/local/include"
-        LDFLAGS="$LDFLAGS -L/usr/local/lib"
-        ;;
-    *linux*)
-        CXXFLAGS="$CXXFLAGS -I/usr/local/include"
-        LDFLAGS="$LDFLAGS -L/usr/local/lib"
-        ;;
+AC_CANONICAL_TARGET
+case $target_cpu in 
+    x86_64*) 
+    AC_MSG_NOTICE(["The target platform is $target_cpu"])
+    if test "x$enable_blsasm" = "xyes"; then
+        AC_MSG_NOTICE(["Enable blsasm"])
+        CXXFLAGS="$CXXFLAGS -D__x86_64_asm__"
+    else
+        AC_MSG_NOTICE(["Disable blsasm $host_os"])
+        case $host_os in
+            darwin*)
+            CXXFLAGS="$CXXFLAGS"
+            ;;
+            *)
+            CXXFLAGS="$CXXFLAGS -flto"
+            ;;
+        esac
+    fi
+    ;;
+    *)
+    AC_MSG_NOTICE([The target platform is not x86_64])
+    CXXFLAGS="$CXXFLAGS -flto"
+    ;;
 esac
 
 
-CXXFLAGS_WARN="-Wall -Wextra -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings -Wfloat-equal -Wpointer-arith -Wundef"
-CXXFLAGS="$CXXFLAGS $CXXFLAGS_WARN -I include -I src"
-
-AC_SUBST(CXXFLAGS)
-AC_SUBST(LDFLAGS)
 AC_SUBST(CXX)
-AC_SUBST(CC)
+AC_SUBST(CXXFLAGS)
 
 AC_CONFIG_FILES([Makefile libbls.pc])
 
@@ -76,4 +69,5 @@ echo "  CPPFLAGS      = $CPPFLAGS"
 echo "  CXX           = $CXX"
 echo "  CXXFLAGS      = $CXXFLAGS"
 echo "  LDFLAGS       = $LDFLAGS"
+echo "  ENABLE_BLSASM = $enable_blsasm"
 echo
