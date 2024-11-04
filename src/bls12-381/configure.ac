@@ -28,16 +28,17 @@ CXXFLAGS="-O3 -I include"
 
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
-case "$target_cpu" in 
-    "x86_64") 
+case $target_cpu in 
+    x86_64*) 
     AC_MSG_NOTICE(["The target platform is $target_cpu"])
     if test "x$enable_blsasm" = "xyes"; then
         AC_MSG_NOTICE(["Enable blsasm"])
         CXXFLAGS="$CXXFLAGS -D__x86_64_asm__"
     else
         AC_MSG_NOTICE(["Disable blsasm $host_os"])
-        case "$host_os" in
-            "*darwin*")
+        case $host_os in
+            darwin*)
+            AC_MSG_NOTICE(["Disable blsasm $host_os"])
             CXXFLAGS="$CXXFLAGS"
             ;;
             *)
