@@ -1088,21 +1088,26 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
 
                     // Deserialize the proof and verifier key input
                     bls12_381_groth16::Groth16ProofWith2PublicInputs proof;
-                    bls12_381_groth16::Groth16VerifierKeyInput vk;
-                    bls12_381_groth16::Groth16VerifierKeyPrecomputedValues precomputed;
+                    static bls12_381_groth16::Groth16VerifierKeyInput vk;
+                    static bls12_381_groth16::Groth16VerifierKeyPrecomputedValues precomputed;
+                    static valtype verfierDataACopy;
 
                     // Check the proof and verifier key deserialization
                     if(!bls12_381_groth16::deserializeProofWith2PublicInputs(&proof, &piA, &piB0, &piB1, &piC, &public_input_0, &public_input_1)){
                         return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
                     }
 
-                    if(!bls12_381_groth16::deserializeVerifierKeyInput(&vk, &verfierDataA, &verfierDataB, &verfierDataC, &verfierDataD, &verfierDataE, &verfierDataF)){
-                        return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
-                    }
+                    if (verfierDataA.size() != verfierDataACopy.size() || !std::equal(verfierDataA.begin(), verfierDataA.end(), verfierDataACopy.begin()))
+                    {
+                        verfierDataACopy = verfierDataA;
+                        if(!bls12_381_groth16::deserializeVerifierKeyInput(&vk, &verfierDataA, &verfierDataB, &verfierDataC, &verfierDataD, &verfierDataE, &verfierDataF)){
+                            return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                        }
 
-                    // Precompute the verifier key
-                    if(!bls12_381_groth16::precomputeVerifierKey(&precomputed, &vk)){
-                        return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                        // Precompute the verifier key
+                        if(!bls12_381_groth16::precomputeVerifierKey(&precomputed, &vk)){
+                            return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                        }
                     }
 
                     // Verify the proof
