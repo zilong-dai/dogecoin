@@ -9,6 +9,7 @@
 #include "crypto/ripemd160.h"
 #include "crypto/sha1.h"
 #include "crypto/sha256.h"
+#include "groth16/groth16.hpp"
 #include "pubkey.h"
 #include "script/script.h"
 #include "uint256.h"
@@ -254,6 +255,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
     static const valtype vchFalse(0);
     static const valtype vchZero(0);
     static const valtype vchTrue(1, 1);
+    bool zkpOpIsUsed = false;
 
     CScript::const_iterator pc = script.begin();
     CScript::const_iterator pend = script.end();
@@ -426,7 +428,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     break;
                 }
 
-                case OP_NOP1: case OP_NOP4: case OP_NOP5:
+                case OP_NOP1: case OP_NOP5:
                 case OP_NOP6: case OP_NOP7: case OP_NOP8: case OP_NOP9: case OP_NOP10:
                 {
                     if (flags & SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS)
@@ -1024,6 +1026,109 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, un
                     }
                 }
                 break;
+                case OP_CHECKZKPVERIFY:
+                {
+                    if (zkpOpIsUsed)
+                    {
+                        return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
+                    }else
+                    {
+                        zkpOpIsUsed = true;
+                    }
+                    
+                    // Ensure stack has enough elements for the groth16 proof verification
+                    if (stack.size() < 12)
+                        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+
+                    // Retrieve the mode from the top of the stack
+                    CScriptNum mode(stacktop(-1), fRequireMinimal);
+                    size_t upperStackOffset = 0;
+
+                    // Handle different modes
+                    if(mode.getint() == 1){
+                        //  Mode 1: tx_hash mode, has no public_input_1
+                        upperStackOffset = 1;
+                    }else if (stack.size() < 13){
+                        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+                    }
+
+                    // Only modes 1 is implemented; Mode 0 is deprecated; others return an error
+                    if(mode.getint() != 1){
+                        // TODO: Implement mode 2 and 3
+                        return set_error(serror, SCRIPT_ERR_SIG_DER);
+                    }
+                    // Retrieve verifier data from the stack
+                    valtype& verfierDataF = stacktop(-2);
+                    valtype& verfierDataE = stacktop(-3);
+                    valtype& verfierDataD = stacktop(-4);
+                    valtype& verfierDataC = stacktop(-5);
+                    valtype& verfierDataB = stacktop(-6);
+                    valtype& verfierDataA = stacktop(-7);
+
+                    valtype publicInput1(32); // Initialize a 32-byte array for tx_hash
+                    if(mode.getint()==1){
+                        CScript scriptCode(pbegincodehash, pend);
+                        uint256 txHash;
+                        if(!checker.GetSigHash(SIGHASH_ALL, scriptCode, sigversion, &txHash)){
+                            return set_error(serror, SCRIPT_ERR_SIG_NULLFAIL);
+                        }
+                        publicInput1.assign(txHash.begin(), txHash.end());
+                        // Truncate the last byte to fit into Fr
+                        publicInput1[31] = 0;//publicInput1[31]&0xf; 
+                    }
+
+                    // Retrieve public inputs and proof elements from the stack
+                    // cut off for witness, if mode is 1, then public_input_1 is the current tx_hash instead of a public input
+                    valtype& public_input_1 = mode.getint()==1?publicInput1:stacktop(-8);
+                    valtype& public_input_0 = stacktop(-9+upperStackOffset);
+                    valtype& piC = stacktop(-10+upperStackOffset);
+                    valtype& piB1 = stacktop(-11+upperStackOffset);
+                    valtype& piB0 = stacktop(-12+upperStackOffset);
+                    valtype& piA = stacktop(-13+upperStackOffset);
+
+                    // Deserialize the proof and verifier key input
+                    bls12_381_groth16::Groth16ProofWith2PublicInputs proof;
+                    static bls12_381_groth16::Groth16VerifierKeyInput vk;
+                    static bls12_381_groth16::Groth16VerifierKeyPrecomputedValues precomputed;
+                    static valtype verfierDataACopy;
+
+                    // Check the proof and verifier key deserialization
+                    if(!bls12_381_groth16::deserializeProofWith2PublicInputs(&proof, &piA, &piB0, &piB1, &piC, &public_input_0, &public_input_1)){
+                        return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                    }
+
+                    if (verfierDataA.size() != verfierDataACopy.size() || !std::equal(verfierDataA.begin(), verfierDataA.end(), verfierDataACopy.begin()))
+                    {
+                        verfierDataACopy = verfierDataA;
+                        if(!bls12_381_groth16::deserializeVerifierKeyInput(&vk, &verfierDataA, &verfierDataB, &verfierDataC, &verfierDataD, &verfierDataE, &verfierDataF)){
+                            return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                        }
+
+                        // Precompute the verifier key
+                        if(!bls12_381_groth16::precomputeVerifierKey(&precomputed, &vk)){
+                            return set_error(serror, SCRIPT_ERR_CHECKMULTISIGVERIFY);
+                        }
+                    }
+
+                    // Verify the proof
+                    int fSuccess = bls12_381_groth16::verifyProofWith2PublicInputs(&proof, &vk, &precomputed);
+
+                    /*
+                    // To be compatible with older versions, we do not modify the stack
+                    for(int i = 0; i < 12; i++){
+                        popstack(stack);
+                    }
+                    if(mode.getint() != 1){
+                        popstack(stack); // extra value for mode 0 and 2
+                    }
+                    stack.push_back(fSuccess ? vchTrue : vchFalse);
+                    */
+                    // Check the result of the verification
+                    if(!fSuccess){
+                       return set_error(serror, SCRIPT_ERR_CHECKSIGVERIFY);
+                    }
+                }
+                break;
 
                 default:
                     return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
@@ -1349,6 +1454,14 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     // comparison is a simple numeric one.
     if (nSequenceMasked > txToSequenceMasked)
         return false;
+
+    return true;
+}
+
+bool TransactionSignatureChecker::GetSigHash(int nHashType, const CScript& scriptCode, SigVersion sigversion, uint256 * sighashOut) const
+{
+
+    *sighashOut = SignatureHash(scriptCode, *txTo, nIn, nHashType, amount, sigversion, this->txdata);
 
     return true;
 }
